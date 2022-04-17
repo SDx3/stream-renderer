@@ -44,7 +44,7 @@ $log          = new Logger('renderer');
 $stringFormat = "[%datetime%] %level_name%: %message% %context% %extra%\n";
 $dateFormat   = 'H:i:s';
 $formatter    = new LineFormatter($stringFormat, $dateFormat, true, true);
-$handler      = new StreamHandler('php://stdout', $_ENV['LOG_LEVEL']);
+$handler      = new StreamHandler('php://stdout', $_ENV['LOG_LEVEL'] ?? 100);
 $handler->setFormatter($formatter);
 $log->pushHandler($handler);
 setlocale(LC_ALL, ['nl', 'nl_NL.UTF-8', 'nl-NL']);
