@@ -53,6 +53,12 @@ class TwitterCollector implements CollectorInterface
     public function collect(bool $skipCache = false): void
     {
         $this->logger->debug('Start of collection.');
+
+        if ($this->hasCache()) {
+            $this->getCache();
+            return;
+        }
+
         if (!$this->hasToken()) {
             $this->getNewTokens();
         }
@@ -77,6 +83,7 @@ class TwitterCollector implements CollectorInterface
         foreach ($tweets['data'] as $tweet) {
             $this->collection[] = $this->getTweet($tweet['id']);
         }
+        $this->saveToCache();
         $this->logger->debug('Done!');
     }
 
@@ -214,5 +221,51 @@ class TwitterCollector implements CollectorInterface
             'author'     => $authorName,
             'html'       => $json['html'],
         ];
+    }
+
+    private function hasCache(): bool
+    {
+        $cacheFile = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        if (!file_exists($cacheFile)) {
+            $this->logger->debug('No cache file, return false.');
+            return false;
+        }
+        $text = file_get_contents($cacheFile);
+        $json = json_decode($text, true, 24);
+        if (time() - $json['moment'] > 3600) {
+            $this->logger->debug('Cache is expired, return false.');
+            return false;
+        }
+        $this->logger->debug('Cache is valid, return true.');
+        return true;
+    }
+
+    /**
+     * @return void
+     */
+    private function saveToCache(): void
+    {
+        $cacheFile = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        $json      = [
+            'moment' => time(),
+            'data'   => $this->collection,
+        ];
+        file_put_contents($cacheFile, json_encode($json, JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * @return void
+     */
+    private function getCache(): void
+    {
+        $cacheFile        = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        $text             = file_get_contents($cacheFile);
+        $json             = json_decode($text, true, 24);
+        $objects          = $json['data'];
+        $this->collection = [];
+        foreach ($objects as $object) {
+            $object['created_at']     = new Carbon($object['created_at']);
+            $this->collection[] = $object;
+        }
     }
 }
