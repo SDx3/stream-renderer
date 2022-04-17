@@ -1,0 +1,9 @@
+---
+title: "{% if text|length > title_length %}{{ text|slice(0,title_length) }}...{% else %}{{ text }}{% endif %}"
+id: {{ id }}
+date: {{ created_at }}
+icon: twitter
+source: Twitter
+src_url: "https://twitter.com/{{ author }}/status/{{ id }}"
+---
+{{ html|raw }}

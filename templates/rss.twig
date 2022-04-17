@@ -1,0 +1,13 @@
+---
+title: "{% if title|length > title_length %}{{ title|slice(0,title_length) }}...{% else %}{{ title }}{% endif %}"
+date: {{ date }}
+icon: rss
+source: RSS
+src_url: {{ url }}
+categories:
+{% for category in categories %}
+- {{ category }}
+{% endfor %}
+
+---
+Het oorspronkelijke artikel kan je lezen op [{{ host }}]({{ url }}).

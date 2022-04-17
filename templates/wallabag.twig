@@ -1,0 +1,12 @@
+---
+title: "{% if title|length > title_length %}{{ title|slice(0,title_length)|raw }}...{% else %}{{ title|raw }}{% endif %}"
+date: {{ created_at }}
+icon: article
+source: Wallabag
+src_url: "{{ wallabag_url }}"
+categories:
+{% for tag in tags %}
+    - {{ tag }}
+{% endfor %}
+---
+Het oorspronkelijke artikel kan je lezen op [{{ host }}]({{ original_url }}) of [op Wallabag]({{ wallabag_url }}).
