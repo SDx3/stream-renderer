@@ -39,7 +39,7 @@ require 'init.php';
 /** @var Logger $log */
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
+$dotenv->safeLoad();
 
 // delete all MD files (the great reset):
 $path = scandir($_ENV['BLOG_PATH']);
