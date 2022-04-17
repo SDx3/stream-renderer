@@ -211,7 +211,7 @@ class TwitterCollector implements CollectorInterface
         }
         $url    = sprintf('https://twitter.com/%s/status/%s', $authorName, $tweet['data']['id']);
         $client = new Client;
-        $res    = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=en&dnt=true', $url));
+        $res    = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=nl&dnt=true', $url));
         $body   = (string) $res->getBody();
         $json   = json_decode($body, true);
         return [
