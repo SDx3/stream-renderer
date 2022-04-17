@@ -32,12 +32,22 @@ use App\Processor\FirefoxProcessor;
 use App\Processor\RSSProcessor;
 use App\Processor\TwitterProcessor;
 use App\Processor\WallabagProcessor;
+use Dotenv\Dotenv;
 use Monolog\Logger;
+
+/** @var Logger $log */
+/** @var Dotenv $dotenv */
 
 require 'init.php';
 
+$dotenv->safeLoad();
+
+if (false === realpath($_ENV['BLOG_PATH'])) {
+    die("BLOG_PATH resolves false.\n");
+}
+
 // delete all MD files (the great reset):
-$path = scandir($_ENV['BLOG_PATH']);
+$path = scandir(realpath($_ENV['BLOG_PATH']));
 foreach ($path as $file) {
     if ('.' !== $file && '..' !== $file && '_index.md' !== $file) {
         if (str_ends_with($file, '.md')) {
@@ -94,31 +104,30 @@ $collector->collect();
 $feedArticles = $collector->getCollection();
 
 
-
 // now process the result of the wallabag collection
 $processor = new WallabagProcessor;
 $processor->setLogger($log);
-$processor->setDestination($_ENV['BLOG_PATH']);
+$processor->setDestination(realpath($_ENV['BLOG_PATH']));
 $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
 $processor->process($articles);
 
 // now process RSS
 $processor = new RSSProcessor;
 $processor->setLogger($log);
-$processor->setDestination($_ENV['BLOG_PATH']);
+$processor->setDestination(realpath($_ENV['BLOG_PATH']));
 $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
 $processor->process($feedArticles);
 
 // now process tweets
 $processor = new TwitterProcessor;
 $processor->setLogger($log);
-$processor->setDestination($_ENV['BLOG_PATH']);
+$processor->setDestination(realpath($_ENV['BLOG_PATH']));
 $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
 $processor->process($bookmarkedTweets);
 
 // now process bookmarks
 $processor = new FirefoxProcessor;
 $processor->setLogger($log);
-$processor->setDestination($_ENV['BLOG_PATH']);
+$processor->setDestination(realpath($_ENV['BLOG_PATH']));
 $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
 $processor->process($bookmarks);
