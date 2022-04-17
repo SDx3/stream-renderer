@@ -32,7 +32,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
 $dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
+$dotenv->safeLoad();
 
 // define cache path
 define('CACHE', sprintf('%s/cache', __DIR__));
