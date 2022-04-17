@@ -37,6 +37,7 @@ class WallabagCollector implements CollectorInterface
     private array  $collection;
     private string $cacheFile;
     private array  $token;
+    private array  $twitterCache;
 
     /**
      * @inheritDoc
@@ -185,6 +186,8 @@ class WallabagCollector implements CollectorInterface
      */
     private function collectArchivedArticles(): void
     {
+        $this->collectTwitterCache();
+
         $this->logger->debug('WallabagCollector will now collect public + archived articles.');
         $client      = new Client;
         $page        = 1;
@@ -216,7 +219,10 @@ class WallabagCollector implements CollectorInterface
             }
             // loop articles and save them:
             foreach ($results['_embedded']['items'] as $item) {
-                $articles[] = $this->processArticle($item);
+                $result = $this->processArticle($item);
+                if (true === $result['include']) {
+                    $articles[] = $result;
+                }
             }
             sleep(2);
             $page++;
@@ -236,12 +242,18 @@ class WallabagCollector implements CollectorInterface
         if (str_starts_with($host, 'www.')) {
             $host = substr($host, 4);
         }
+        $include = true;
+        if ($this->inTwitterCache($item['url'])) {
+            $include = false;
+            $this->logger->debug(sprintf('Will not include "%s", is already a bookmarked tweet.', $item['url']));
+        }
 
         $article = [
             'type'         => 'wallabag',
             'title'        => $item['title'],
             'original_url' => $item['url'],
             'host'         => $host,
+            'include'      => $include,
             'archived_at'  => new Carbon($item['archived_at']),
             'created_at'   => new Carbon($item['created_at']),
             'wallabag_url' => sprintf('%s/share/%s', $this->configuration['host'], $item['uid']),
@@ -307,5 +319,36 @@ class WallabagCollector implements CollectorInterface
             $this->collection[$index] = $entry;
         }
 
+    }
+
+    /**
+     * @return void
+     */
+    private function collectTwitterCache(): void
+    {
+        $this->twitterCache = [];
+        $cacheFile          = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        if (file_exists($cacheFile)) {
+            $text               = file_get_contents($cacheFile);
+            $json               = json_decode($text, true, 24);
+            $this->twitterCache = $json['data'];
+        }
+    }
+
+    /**
+     * @param string $url
+     * @return bool
+     */
+    private function inTwitterCache(string $url): bool
+    {
+        if (0 === count($this->twitterCache)) {
+            return false;
+        }
+        foreach ($this->twitterCache as $entry) {
+            if ($entry['url'] === $url) {
+                return true;
+            }
+        }
+        return false;
     }
 }

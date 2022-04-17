@@ -211,7 +211,7 @@ class TwitterCollector implements CollectorInterface
         }
         $url    = sprintf('https://twitter.com/%s/status/%s', $authorName, $tweet['data']['id']);
         $client = new Client;
-        $res    = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s', $url));
+        $res    = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=en&dnt=true', $url));
         $body   = (string) $res->getBody();
         $json   = json_decode($body, true);
         return [
@@ -219,6 +219,7 @@ class TwitterCollector implements CollectorInterface
             'created_at' => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at']),
             'text'       => $tweet['data']['text'],
             'author'     => $authorName,
+            'url'        => $url,
             'html'       => $json['html'],
         ];
     }
@@ -264,8 +265,8 @@ class TwitterCollector implements CollectorInterface
         $objects          = $json['data'];
         $this->collection = [];
         foreach ($objects as $object) {
-            $object['created_at']     = new Carbon($object['created_at']);
-            $this->collection[] = $object;
+            $object['created_at'] = new Carbon($object['created_at']);
+            $this->collection[]   = $object;
         }
     }
 }

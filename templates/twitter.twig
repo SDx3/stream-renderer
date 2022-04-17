@@ -1,5 +1,5 @@
 ---
-title: "{% if text|length > title_length %}{{ text|slice(0,title_length) }}...{% else %}{{ text }}{% endif %}"
+title: "{% if text|length > title_length %}{{ text|slice(0,title_length)|raw }}...{% else %}{{ text|raw }}{% endif %}"
 id: {{ id }}
 date: {{ created_at }}
 icon: twitter

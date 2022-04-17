@@ -52,7 +52,20 @@ foreach ($path as $file) {
     }
 }
 
-// collect Wallabag
+// collect Twitter
+$collector = new TwitterCollector;
+$collector->setLogger($log);
+$collector->setConfiguration(
+    [
+        'client_id'     => $_ENV['TWITTER_CLIENT_ID'],
+        'client_secret' => $_ENV['TWITTER_CLIENT_SECRET'],
+        'user_id'       => $_ENV['TWITTER_USER_ID'],
+    ]
+);
+$collector->collect();
+$bookmarkedTweets = $collector->getCollection();
+
+// collect Wallabag (skips over Twitter entries)
 $collector     = new WallabagCollector;
 $configuration = [
     'client_id'     => $_ENV['WALLABAG_CLIENT_ID'],
@@ -66,7 +79,7 @@ $collector->setLogger($log);
 $collector->collect();
 $articles = $collector->getCollection();
 
-// collect bookmarks
+// collect bookmarks (skips over Twitter + Wallabag entries)
 $collector = new FirefoxCollector();
 $collector->setLogger($log);
 $collector->setConfiguration(
@@ -85,18 +98,7 @@ $collector->setConfiguration(['feed' => $_ENV['PUBLISHED_ARTICLES_FEED']]);
 $collector->collect();
 $feedArticles = $collector->getCollection();
 
-// collect Twitter
-$collector = new TwitterCollector;
-$collector->setLogger($log);
-$collector->setConfiguration(
-    [
-        'client_id'     => $_ENV['TWITTER_CLIENT_ID'],
-        'client_secret' => $_ENV['TWITTER_CLIENT_SECRET'],
-        'user_id'       => $_ENV['TWITTER_USER_ID'],
-    ]
-);
-$collector->collect();
-$bookmarkedTweets = $collector->getCollection();
+
 
 // now process the result of the wallabag collection
 $processor = new WallabagProcessor;
