@@ -1,9 +1,10 @@
 ---
 title: "{% if title|length > title_length %}{{ title|slice(0,title_length)|raw }}...{% else %}{{ title|raw }}{% endif %}"
-date: {{ created_at }}
+date: {{ date }}
 icon: article
 source: Wallabag
 src_url: "{{ wallabag_url }}"
+{{ year }}: "{{ month }}"
 categories:
 {% for tag in tags %}
     - {{ tag }}
