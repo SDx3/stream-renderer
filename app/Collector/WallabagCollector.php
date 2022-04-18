@@ -27,6 +27,7 @@ namespace App\Collector;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Monolog\Logger;
 
 class WallabagCollector implements CollectorInterface
@@ -126,10 +127,17 @@ class WallabagCollector implements CollectorInterface
 
         while (true === $hasMore) {
             $this->logger->debug(sprintf('WallabagCollector is now working on page #%d.', $page));
-            $url      = sprintf($articlesUrl, $this->configuration['host'], $page);
-            $response = $client->get($url, $opts);
-            $body     = (string) $response->getBody();
-            $results  = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            $url = sprintf($articlesUrl, $this->configuration['host'], $page);
+            try {
+                $response = $client->get($url, $opts);
+            } catch (ClientException $e) {
+                $this->logger->error(sprintf('Page "%s" resulted in a %d-code. Continue.', $url, $e->getResponse()->getStatusCode()));
+                $hasMore = false;
+                $page++;
+                continue;
+            }
+            $body    = (string) $response->getBody();
+            $results = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 
             $this->logger->addRecord($results['total'] > 0 ? 200 : 100, sprintf('WallabagCollector found %d new article(s) to make public.', $results['total']));
 
@@ -254,8 +262,7 @@ class WallabagCollector implements CollectorInterface
             'original_url' => $item['url'],
             'host'         => $host,
             'include'      => $include,
-            'archived_at'  => new Carbon($item['archived_at']),
-            'created_at'   => new Carbon($item['created_at']),
+            'date'         => new Carbon($item['created_at']), // mag ook "archived at" maar liever deze.
             'wallabag_url' => sprintf('%s/share/%s', $this->configuration['host'], $item['uid']),
             'tags'         => [],
             'annotations'  => [],
@@ -313,8 +320,8 @@ class WallabagCollector implements CollectorInterface
         $this->collection = $json['data'];
         $this->logger->debug('WallabagCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
-            $entry['archived_at'] = new Carbon($entry['archived_at']);
-            $entry['created_at']  = new Carbon($entry['created_at']);
+            $entry['date'] = new Carbon($entry['date']);
+            //$entry['created_at']  = new Carbon($entry['created_at']);
 
             $this->collection[$index] = $entry;
         }

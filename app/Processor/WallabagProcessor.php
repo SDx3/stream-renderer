@@ -59,9 +59,11 @@ class WallabagProcessor implements ProcessorInterface
                 '\\"',
             ];
             $item['title_length'] = $this->titleLength;
+            $item['year']         = $item['date']->year;
+            $item['month']        = $item['date']->format('m');
             $item['title']        = str_replace($search, $replace, $item['title']);
             $content              = $template->render($item);
-            $date                 = $item['created_at']->format('Y-m-d-H-i');
+            $date                 = $item['date']->format('Y-m-d-H-i');
             $filename             = sprintf('%s-wallabag.md', $date);
             $full                 = sprintf('%s/%s', $this->destination, $filename);
             file_put_contents($full, $content);

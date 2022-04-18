@@ -54,14 +54,15 @@ class TwitterProcessor implements ProcessorInterface
         $template = $twig->load('twitter.twig');
         foreach ($items as $item) {
             $item['title_length'] = $this->titleLength;
-
-            $search       = ['"'];
-            $replace      = ['\\"'];
-            $item['text'] = str_replace($search, $replace, $item['text']);
-            $content      = $template->render($item);
-            $date         = $item['created_at']->format('Y-m-d-H-i');
-            $filename     = sprintf('%s-tweet.md', $date);
-            $full         = sprintf('%s/%s', $this->destination, $filename);
+            $item['year']         = $item['date']->year;
+            $item['month']        = $item['date']->format('m');
+            $search               = ['"'];
+            $replace              = ['\\"'];
+            $item['title']        = str_replace($search, $replace, $item['title']);
+            $content              = $template->render($item);
+            $date                 = $item['date']->format('Y-m-d-H-i');
+            $filename             = sprintf('%s-tweet.md', $date);
+            $full                 = sprintf('%s/%s', $this->destination, $filename);
             file_put_contents($full, $content);
         }
         $this->logger->debug('Done!');

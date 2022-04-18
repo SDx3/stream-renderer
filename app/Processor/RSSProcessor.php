@@ -51,6 +51,8 @@ class RSSProcessor implements ProcessorInterface
         $template = $twig->load('rss.twig');
         foreach ($items as $item) {
             $item['title_length'] = $this->titleLength;
+            $item['year']         = $item['date']->year;
+            $item['month']        = $item['date']->format('m');
             $content              = $template->render($item);
             $date                 = $item['date']->format('Y-m-d-H-i');
             $filename             = sprintf('%s-article.md', $date);
