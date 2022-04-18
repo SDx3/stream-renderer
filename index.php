@@ -47,6 +47,7 @@ if (false === realpath($_ENV['BLOG_PATH'])) {
 }
 
 // delete all MD files (the great reset):
+$log->debug('Deleting old posts...');
 $path = scandir(realpath($_ENV['BLOG_PATH']));
 foreach ($path as $file) {
     if ('.' !== $file && '..' !== $file && '_index.md' !== $file) {
@@ -56,6 +57,7 @@ foreach ($path as $file) {
         }
     }
 }
+$log->debug('Done!');
 
 // collect Twitter
 $collector = new TwitterCollector;
