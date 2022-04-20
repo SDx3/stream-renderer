@@ -59,77 +59,96 @@ foreach ($path as $file) {
 }
 $log->debug('Done!');
 
+$bookmarkedTweets = [];
+$articles         = [];
+$bookmarks        = [];
+$feedArticles     = [];
+
 // collect Twitter
-$collector = new TwitterCollector;
-$collector->setLogger($log);
-$collector->setConfiguration(
-    [
-        'client_id'     => $_ENV['TWITTER_CLIENT_ID'],
-        'client_secret' => $_ENV['TWITTER_CLIENT_SECRET'],
-        'user_id'       => $_ENV['TWITTER_USER_ID'],
-    ]
-);
-$collector->collect();
-$bookmarkedTweets = $collector->getCollection();
+if ('true' === $_ENV['RUN_TWITTER']) {
+    $collector = new TwitterCollector;
+    $collector->setLogger($log);
+    $collector->setConfiguration(
+        [
+            'client_id'     => $_ENV['TWITTER_CLIENT_ID'],
+            'client_secret' => $_ENV['TWITTER_CLIENT_SECRET'],
+            'user_id'       => $_ENV['TWITTER_USER_ID'],
+        ]
+    );
+    $collector->collect();
+    $bookmarkedTweets = $collector->getCollection();
+}
 
-// collect Wallabag (skips over Twitter entries)
-$collector     = new WallabagCollector;
-$configuration = [
-    'client_id'     => $_ENV['WALLABAG_CLIENT_ID'],
-    'client_secret' => $_ENV['WALLABAG_CLIENT_SECRET'],
-    'username'      => $_ENV['WALLABAG_USERNAME'],
-    'password'      => $_ENV['WALLABAG_PASSWORD'],
-    'host'          => $_ENV['WALLABAG_HOST'],
-];
-$collector->setConfiguration($configuration);
-$collector->setLogger($log);
-$collector->collect();
-$articles = $collector->getCollection();
+// collect Wallabag (skips over Twitter entries by reading its cache)
+if ('true' === $_ENV['RUN_WALLABAG']) {
+    $collector     = new WallabagCollector;
+    $configuration = [
+        'client_id'     => $_ENV['WALLABAG_CLIENT_ID'],
+        'client_secret' => $_ENV['WALLABAG_CLIENT_SECRET'],
+        'username'      => $_ENV['WALLABAG_USERNAME'],
+        'password'      => $_ENV['WALLABAG_PASSWORD'],
+        'host'          => $_ENV['WALLABAG_HOST'],
+    ];
+    $collector->setConfiguration($configuration);
+    $collector->setLogger($log);
+    $collector->collect();
+    $articles = $collector->getCollection();
+}
 
-// collect bookmarks (skips over Twitter + Wallabag entries)
-$collector = new FirefoxCollector();
-$collector->setLogger($log);
-$collector->setConfiguration(
-    [
-        'exclude_hosts' => explode(',', $_ENV['EXCLUDE_HOSTS']),
-    ]
-);
-$collector->collect();
-$bookmarks = $collector->getCollection();
-
+// collect bookmarks (skips over Twitter + Wallabag entries by reading respective cache files)
+if ('true' === $_ENV['RUN_BOOKMARKS']) {
+    $collector = new FirefoxCollector();
+    $collector->setLogger($log);
+    $collector->setConfiguration(
+        [
+            'exclude_hosts' => explode(',', $_ENV['EXCLUDE_HOSTS']),
+        ]
+    );
+    $collector->collect();
+    $bookmarks = $collector->getCollection();
+}
 
 // collect RSS
-$collector = new RSSCollector;
-$collector->setLogger($log);
-$collector->setConfiguration(['feed' => $_ENV['PUBLISHED_ARTICLES_FEED']]);
-$collector->collect();
-$feedArticles = $collector->getCollection();
-
+if ('true' === $_ENV['RUN_RSS']) {
+    $collector = new RSSCollector;
+    $collector->setLogger($log);
+    $collector->setConfiguration(['feed' => $_ENV['PUBLISHED_ARTICLES_FEED']]);
+    $collector->collect();
+    $feedArticles = $collector->getCollection();
+}
 
 // now process the result of the wallabag collection
-$processor = new WallabagProcessor;
-$processor->setLogger($log);
-$processor->setDestination(realpath($_ENV['BLOG_PATH']));
-$processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
-$processor->process($articles);
+if ('true' === $_ENV['RUN_WALLABAG']) {
+    $processor = new WallabagProcessor;
+    $processor->setLogger($log);
+    $processor->setDestination(realpath($_ENV['BLOG_PATH']));
+    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->process($articles);
+}
 
 // now process RSS
-$processor = new RSSProcessor;
-$processor->setLogger($log);
-$processor->setDestination(realpath($_ENV['BLOG_PATH']));
-$processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
-$processor->process($feedArticles);
+if ('true' === $_ENV['RUN_RSS']) {
+    $processor = new RSSProcessor;
+    $processor->setLogger($log);
+    $processor->setDestination(realpath($_ENV['BLOG_PATH']));
+    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->process($feedArticles);
+}
 
 // now process tweets
-$processor = new TwitterProcessor;
-$processor->setLogger($log);
-$processor->setDestination(realpath($_ENV['BLOG_PATH']));
-$processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
-$processor->process($bookmarkedTweets);
+if ('true' === $_ENV['RUN_TWITTER']) {
+    $processor = new TwitterProcessor;
+    $processor->setLogger($log);
+    $processor->setDestination(realpath($_ENV['BLOG_PATH']));
+    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->process($bookmarkedTweets);
+}
 
 // now process bookmarks
-$processor = new FirefoxProcessor;
-$processor->setLogger($log);
-$processor->setDestination(realpath($_ENV['BLOG_PATH']));
-$processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
-$processor->process($bookmarks);
+if ('true' === $_ENV['RUN_BOOKMARKS']) {
+    $processor = new FirefoxProcessor;
+    $processor->setLogger($log);
+    $processor->setDestination(realpath($_ENV['BLOG_PATH']));
+    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->process($bookmarks);
+}
