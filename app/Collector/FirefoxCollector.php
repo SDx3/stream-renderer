@@ -88,8 +88,9 @@ class FirefoxCollector implements CollectorInterface
             if (true === $isYoutube) {
                 // get oEmbed for youtube movie:
                 $params = [
-                    'url'    => $bookmark['uri'],
-                    'format' => 'json',
+                    'url'      => $bookmark['uri'],
+                    'format'   => 'json',
+                    'maxwidth' => '600', 
                 ];
                 $url    = sprintf('https://www.youtube.com/oembed?%s', http_build_query($params));
                 $client = new Client;
