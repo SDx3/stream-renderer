@@ -224,10 +224,7 @@ class WallabagCollector implements CollectorInterface
             }
             // loop articles and save them:
             foreach ($results['_embedded']['items'] as $item) {
-                $result = $this->processArticle($item);
-                if (true === $result['include']) {
-                    $articles[] = $result;
-                }
+                $articles[] = $this->processArticle($item);
             }
             sleep(2);
             $page++;
