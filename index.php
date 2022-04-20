@@ -79,7 +79,7 @@ if ('true' === $_ENV['RUN_TWITTER']) {
     $bookmarkedTweets = $collector->getCollection();
 }
 
-// collect Wallabag (skips over Twitter entries by reading its cache)
+// collect Wallabag
 if ('true' === $_ENV['RUN_WALLABAG']) {
     $collector     = new WallabagCollector;
     $configuration = [
@@ -95,7 +95,7 @@ if ('true' === $_ENV['RUN_WALLABAG']) {
     $articles = $collector->getCollection();
 }
 
-// collect bookmarks (skips over Twitter + Wallabag entries by reading respective cache files)
+// collect bookmarks
 if ('true' === $_ENV['RUN_BOOKMARKS']) {
     $collector = new FirefoxCollector();
     $collector->setLogger($log);

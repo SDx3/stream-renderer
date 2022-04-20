@@ -146,23 +146,12 @@ class FirefoxCollector implements CollectorInterface
         $this->logger->debug('FirefoxCollector now has a logger!');
     }
 
-    private function parseWallabag(): array
-    {
-        $return = [];
-        $file   = sprintf('%s/%s', CACHE, 'wallabag.json');
-        if (file_exists($file)) {
-            $content = file_get_contents($file);
-            $json    = json_decode($content, true);
-            if (array_key_exists('data', $json)) {
-                foreach ($json['data'] as $entry) {
-                    $key      = sha1($entry['original_url']);
-                    $return[] = $key;
-                }
-            }
-        }
-        return $return;
-    }
-
+    /**
+     * @param array  $sorted
+     * @param string $id
+     * @param array  $tags
+     * @return array
+     */
     private function getTags(array $sorted, string $id, array $tags): array
     {
         // first find the ID and add it to tags:

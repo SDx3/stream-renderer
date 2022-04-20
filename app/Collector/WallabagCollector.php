@@ -38,7 +38,6 @@ class WallabagCollector implements CollectorInterface
     private array  $collection;
     private string $cacheFile;
     private array  $token;
-    private array  $twitterCache;
 
     /**
      * @inheritDoc
