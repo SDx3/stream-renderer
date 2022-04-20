@@ -99,8 +99,8 @@ class FirefoxCollector implements CollectorInterface
                 $html   = $json['html'];
 
                 // this is a very cheap but effective way to resize the video:
-                $search  = 'width="356" height="200"';
-                $replace = 'width="712" height="400"';
+                $search  = 'width="200" height="113"';
+                $replace = 'width="600" height="339"';
                 $html    = str_replace($search, $replace, $html);
 
             }
