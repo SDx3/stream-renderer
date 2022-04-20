@@ -47,11 +47,7 @@ class FirefoxCollector implements CollectorInterface
         $json             = json_decode($body, true, 25);
         $sorted           = [];
         $sorted           = $this->processChildren('(root)', $json, $sorted);
-
-        $wallabag = $this->parseWallabag();
-
-
-        foreach ($sorted as $id => $bookmark) {
+        foreach ($sorted as $bookmark) {
             // if not a bookmark, continue:
             if ('text/x-moz-place' !== $bookmark['type']) {
                 continue;
@@ -63,14 +59,8 @@ class FirefoxCollector implements CollectorInterface
                 continue;
             }
 
-
-            // if already in wallabag, continue
+            // if already in collection, continue (duplicate bookmark):
             $hash = sha1($bookmark['uri']);
-            if (in_array($hash, $wallabag)) {
-                continue;
-            }
-
-            // if already in collection, continue:
             if (in_array($hash, $this->collection)) {
                 $this->logger->debug(sprintf('Skip "%s", already in collection.', $bookmark['title']));
                 continue;
@@ -90,6 +80,9 @@ class FirefoxCollector implements CollectorInterface
             // get parent(s) as tags:
             $tags                    = $bookmark['tags'];
             $tags                    = $this->getTags($sorted, $bookmark['parent'], $tags);
+
+            // TODO filter on tags.
+
             $this->collection[$hash] = [
                 'categories' => $tags,
                 'title'      => $bookmark['title'],
