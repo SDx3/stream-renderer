@@ -90,7 +90,6 @@ class FirefoxCollector implements CollectorInterface
                 $params = [
                     'url'      => $bookmark['uri'],
                     'format'   => 'json',
-                    'maxwidth' => '600', 
                 ];
                 $url    = sprintf('https://www.youtube.com/oembed?%s', http_build_query($params));
                 $client = new Client;
@@ -98,6 +97,12 @@ class FirefoxCollector implements CollectorInterface
                 $body   = (string) $res->getBody();
                 $json   = json_decode($body, true);
                 $html   = $json['html'];
+
+                // this is a very cheap but effective way to resize the video:
+                $search  = 'width="356" height="200"';
+                $replace = 'width="712" height="400"';
+                $html    = str_replace($search, $replace, $html);
+
             }
 
             // get parent(s) as tags:
