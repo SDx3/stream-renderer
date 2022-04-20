@@ -52,6 +52,7 @@ class WallabagProcessor implements ProcessorInterface
         ]);
         $template = $twig->load('wallabag.twig');
         foreach ($items as $item) {
+
             $search               = [
                 '"',
             ];
