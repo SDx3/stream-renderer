@@ -28,6 +28,7 @@ use App\Collector\FirefoxCollector;
 use App\Collector\RSSCollector;
 use App\Collector\TwitterCollector;
 use App\Collector\WallabagCollector;
+use App\Filter\PostFilter;
 use App\Processor\FirefoxProcessor;
 use App\Processor\RSSProcessor;
 use App\Processor\TwitterProcessor;
@@ -116,6 +117,19 @@ if ('true' === $_ENV['RUN_RSS']) {
     $collector->collect();
     $feedArticles = $collector->getCollection();
 }
+
+// filter content:
+$filter = new PostFilter();
+$filter->setLogger($log);
+$filter->setWallabag($articles);
+$filter->setRss($feedArticles);
+$filter->setTweets($bookmarkedTweets);
+$filter->setBookmarks($bookmarks);
+
+$articles         = $filter->getFilteredWallabag();
+$feedArticles     = $filter->getFilteredRss();
+$bookmarkedTweets = $filter->getFilteredTweets();
+$bookmarks        = $filter->getFilteredBookmarks();
 
 // now process the result of the wallabag collection
 if ('true' === $_ENV['RUN_WALLABAG']) {
