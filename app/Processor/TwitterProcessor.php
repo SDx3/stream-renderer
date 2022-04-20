@@ -35,8 +35,8 @@ use Twig\Loader\FilesystemLoader;
 class TwitterProcessor implements ProcessorInterface
 {
 
-    private Logger $logger;
     private string $destination;
+    private Logger $logger;
     private int    $titleLength = 50;
 
     /**
@@ -71,19 +71,19 @@ class TwitterProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function setLogger(Logger $logger): void
+    public function setDestination(string $destination): void
     {
-        $this->logger = $logger;
-        $this->logger->debug('TwitterProcessor has a logger!');
+        $this->destination = $destination;
+        $this->logger->debug(sprintf('TwitterProcessor has a destination: %s', $destination));
     }
 
     /**
      * @inheritDoc
      */
-    public function setDestination(string $destination): void
+    public function setLogger(Logger $logger): void
     {
-        $this->destination = $destination;
-        $this->logger->debug(sprintf('TwitterProcessor has a destination: %s', $destination));
+        $this->logger = $logger;
+        $this->logger->debug('TwitterProcessor has a logger!');
     }
 
     /**

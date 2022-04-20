@@ -34,8 +34,8 @@ use Twig\Loader\FilesystemLoader;
  */
 class WallabagProcessor implements ProcessorInterface
 {
-    private Logger $logger;
     private string $destination;
+    private Logger $logger;
     private int    $titleLength = 50;
 
     /**
@@ -75,19 +75,19 @@ class WallabagProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function setLogger(Logger $logger): void
+    public function setDestination(string $destination): void
     {
-        $this->logger = $logger;
-        $this->logger->debug('WallabagProcessor has a logger!');
+        $this->destination = $destination;
+        $this->logger->debug(sprintf('WallabagProcessor has a destination: %s', $destination));
     }
 
     /**
      * @inheritDoc
      */
-    public function setDestination(string $destination): void
+    public function setLogger(Logger $logger): void
     {
-        $this->destination = $destination;
-        $this->logger->debug(sprintf('WallabagProcessor has a destination: %s', $destination));
+        $this->logger = $logger;
+        $this->logger->debug('WallabagProcessor has a logger!');
     }
 
     /**

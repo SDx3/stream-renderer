@@ -33,17 +33,9 @@ use SimplePie_Item;
 
 class RSSCollector implements CollectorInterface
 {
-    private array  $configuration;
     private array  $collection;
+    private array  $configuration;
     private Logger $logger;
-
-    /**
-     * @inheritDoc
-     */
-    public function setConfiguration(array $configuration): void
-    {
-        $this->configuration = $configuration;
-    }
 
     /**
      * @inheritDoc
@@ -91,6 +83,14 @@ class RSSCollector implements CollectorInterface
     public function getCollection(): array
     {
         return $this->collection;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setConfiguration(array $configuration): void
+    {
+        $this->configuration = $configuration;
     }
 
     /**

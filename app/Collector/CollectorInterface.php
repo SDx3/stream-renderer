@@ -20,6 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 namespace App\Collector;
 
 use Monolog\Logger;
@@ -30,11 +31,6 @@ use Monolog\Logger;
 interface CollectorInterface
 {
     /**
-     * @param array $configuration
-     */
-    public function setConfiguration(array $configuration): void;
-
-    /**
      * @param bool $skipCache
      */
     public function collect(bool $skipCache = false): void;
@@ -43,6 +39,11 @@ interface CollectorInterface
      * @return array
      */
     public function getCollection(): array;
+
+    /**
+     * @param array $configuration
+     */
+    public function setConfiguration(array $configuration): void;
 
     /**
      * @param Logger $logger

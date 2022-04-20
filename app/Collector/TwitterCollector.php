@@ -35,17 +35,9 @@ use Monolog\Logger;
  */
 class TwitterCollector implements CollectorInterface
 {
+    private array  $collection = [];
     private array  $configuration;
     private Logger $logger;
-    private array  $collection = [];
-
-    /**
-     * @inheritDoc
-     */
-    public function setConfiguration(array $configuration): void
-    {
-        $this->configuration = $configuration;
-    }
 
     /**
      * @inheritDoc
@@ -87,43 +79,56 @@ class TwitterCollector implements CollectorInterface
         $this->logger->debug('Done!');
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getCollection(): array
+    private function hasCache(): bool
     {
-        return $this->collection;
+        $cacheFile = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        if (!file_exists($cacheFile)) {
+            $this->logger->debug('No cache file, return false.');
+            return false;
+        }
+        $text = file_get_contents($cacheFile);
+        $json = json_decode($text, true, 24);
+        if (time() - $json['moment'] > 3600) {
+            $this->logger->debug('Cache is expired, return false.');
+            return false;
+        }
+        $this->logger->debug('Cache is valid, return true.');
+        return true;
     }
 
     /**
-     * @inheritDoc
+     * @return void
      */
-    public function setLogger(Logger $logger): void
+    private function getCache(): void
     {
-        $this->logger = $logger;
-        $this->logger->debug('TwitterCollector now has a logger!');
+        $cacheFile        = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        $text             = file_get_contents($cacheFile);
+        $json             = json_decode($text, true, 24);
+        $objects          = $json['data'];
+        $this->collection = [];
+        foreach ($objects as $object) {
+            $object['date']     = new Carbon($object['date']);
+            $this->collection[] = $object;
+        }
     }
 
-    /**
-     * @return bool
-     */
-    private function getNewTokens(): bool
+    private function hasToken(): bool
     {
-        $params = [
-            'response_type'         => 'code',
-            'client_id'             => $this->configuration['client_id'],
-            'redirect_uri'          => 'http://10.0.0.15/projects/sanderdorigo.nl-renderer/callback.php',
-            'scope'                 => 'tweet.read users.read bookmark.read offline.access',
-            'state'                 => (string) random_int(1, 1000),
-            'code_challenge'        => 'challenge',
-            'code_challenge_method' => 'plain',
-        ];
-        $url    = 'https://twitter.com/i/oauth2/authorize?' . http_build_query($params);
-        echo "Since you have no refresh token, please visit this URL:\n";
-        echo $url;
-        echo "\n";
-
-        exit;
+        $file = sprintf('%s/twitter.json', CACHE);
+        if (!file_exists($file)) {
+            $this->logger->debug('No cache file, so always false.');
+            return false;
+        }
+        $content = file_get_contents($file);
+        $json    = json_decode($content, true);
+        if (time() > $json['expire_time']) {
+            $this->logger->debug('Token is expired, need to get a new one.');
+            $this->configuration['refresh_token'] = $json['refresh_token'];
+            $this->getAccessToken();
+            return true;
+        }
+        $this->configuration['access_token'] = $json['access_token'];
+        return true;
     }
 
     /**
@@ -159,23 +164,26 @@ class TwitterCollector implements CollectorInterface
         return $json['access_token'];
     }
 
-    private function hasToken(): bool
+    /**
+     * @return bool
+     */
+    private function getNewTokens(): bool
     {
-        $file = sprintf('%s/twitter.json', CACHE);
-        if (!file_exists($file)) {
-            $this->logger->debug('No cache file, so always false.');
-            return false;
-        }
-        $content = file_get_contents($file);
-        $json    = json_decode($content, true);
-        if (time() > $json['expire_time']) {
-            $this->logger->debug('Token is expired, need to get a new one.');
-            $this->configuration['refresh_token'] = $json['refresh_token'];
-            $this->getAccessToken();
-            return true;
-        }
-        $this->configuration['access_token'] = $json['access_token'];
-        return true;
+        $params = [
+            'response_type'         => 'code',
+            'client_id'             => $this->configuration['client_id'],
+            'redirect_uri'          => 'http://10.0.0.15/projects/sanderdorigo.nl-renderer/callback.php',
+            'scope'                 => 'tweet.read users.read bookmark.read offline.access',
+            'state'                 => (string) random_int(1, 1000),
+            'code_challenge'        => 'challenge',
+            'code_challenge_method' => 'plain',
+        ];
+        $url    = 'https://twitter.com/i/oauth2/authorize?' . http_build_query($params);
+        echo "Since you have no refresh token, please visit this URL:\n";
+        echo $url;
+        echo "\n";
+
+        exit;
     }
 
     /**
@@ -224,23 +232,6 @@ class TwitterCollector implements CollectorInterface
         ];
     }
 
-    private function hasCache(): bool
-    {
-        $cacheFile = sprintf('%s/%s', CACHE, 'twitter-cache.json');
-        if (!file_exists($cacheFile)) {
-            $this->logger->debug('No cache file, return false.');
-            return false;
-        }
-        $text = file_get_contents($cacheFile);
-        $json = json_decode($text, true, 24);
-        if (time() - $json['moment'] > 3600) {
-            $this->logger->debug('Cache is expired, return false.');
-            return false;
-        }
-        $this->logger->debug('Cache is valid, return true.');
-        return true;
-    }
-
     /**
      * @return void
      */
@@ -255,18 +246,27 @@ class TwitterCollector implements CollectorInterface
     }
 
     /**
-     * @return void
+     * @inheritDoc
      */
-    private function getCache(): void
+    public function getCollection(): array
     {
-        $cacheFile        = sprintf('%s/%s', CACHE, 'twitter-cache.json');
-        $text             = file_get_contents($cacheFile);
-        $json             = json_decode($text, true, 24);
-        $objects          = $json['data'];
-        $this->collection = [];
-        foreach ($objects as $object) {
-            $object['date'] = new Carbon($object['date']);
-            $this->collection[]   = $object;
-        }
+        return $this->collection;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setConfiguration(array $configuration): void
+    {
+        $this->configuration = $configuration;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setLogger(Logger $logger): void
+    {
+        $this->logger = $logger;
+        $this->logger->debug('TwitterCollector now has a logger!');
     }
 }

@@ -32,8 +32,8 @@ use Twig\Loader\FilesystemLoader;
 class RSSProcessor implements ProcessorInterface
 {
 
-    private Logger $logger;
     private string $destination;
+    private Logger $logger;
     private int    $titleLength = 50;
 
     /**
@@ -65,19 +65,19 @@ class RSSProcessor implements ProcessorInterface
     /**
      * @inheritDoc
      */
-    public function setLogger(Logger $logger): void
+    public function setDestination(string $destination): void
     {
-        $this->logger = $logger;
-        $this->logger->debug('RSSProcessor has a logger!');
+        $this->destination = $destination;
+        $this->logger->debug(sprintf('RSSProcessor has a destination: %s', $destination));
     }
 
     /**
      * @inheritDoc
      */
-    public function setDestination(string $destination): void
+    public function setLogger(Logger $logger): void
     {
-        $this->destination = $destination;
-        $this->logger->debug(sprintf('RSSProcessor has a destination: %s', $destination));
+        $this->logger = $logger;
+        $this->logger->debug('RSSProcessor has a logger!');
     }
 
     /**

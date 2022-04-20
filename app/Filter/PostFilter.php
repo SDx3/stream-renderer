@@ -30,11 +30,11 @@ use Monolog\Logger;
  */
 class PostFilter
 {
-    private Logger $logger;
-    private array  $tweets;
     private array  $bookmarks;
-    private array  $wallabag;
+    private Logger $logger;
     private array  $rss;
+    private array  $tweets;
+    private array  $wallabag;
 
     /**
      * Bookmarks must not be bookmarked tweets or Wallabag items.
@@ -62,6 +62,34 @@ class PostFilter
             }
         }
         return $result;
+    }
+
+    /**
+     * Get array of Tweet URL's.
+     *
+     * @return array
+     */
+    private function getTweetURLs(): array
+    {
+        $filtered = [];
+        foreach ($this->tweets as $tweet) {
+            $filtered[] = $tweet['url'];
+        }
+        return $filtered;
+    }
+
+    /**
+     * Get array of Wallabag URL's
+     *
+     * @return array
+     */
+    private function getWallabagURLs(): array
+    {
+        $filtered = [];
+        foreach ($this->wallabag as $item) {
+            $filtered[] = $item['original_url'];
+        }
+        return $filtered;
     }
 
     /**
@@ -131,35 +159,11 @@ class PostFilter
     }
 
     /**
-     * @param array $tweets
-     */
-    public function setTweets(array $tweets): void
-    {
-        $this->tweets = $tweets;
-    }
-
-    /**
      * @param array $bookmarks
      */
     public function setBookmarks(array $bookmarks): void
     {
         $this->bookmarks = $bookmarks;
-    }
-
-    /**
-     * @param array $wallabag
-     */
-    public function setWallabag(array $wallabag): void
-    {
-        $this->wallabag = $wallabag;
-    }
-
-    /**
-     * @param array $rss
-     */
-    public function setRss(array $rss): void
-    {
-        $this->rss = $rss;
     }
 
     /**
@@ -172,31 +176,27 @@ class PostFilter
     }
 
     /**
-     * Get array of Tweet URL's.
-     *
-     * @return array
+     * @param array $rss
      */
-    private function getTweetURLs(): array
+    public function setRss(array $rss): void
     {
-        $filtered = [];
-        foreach ($this->tweets as $tweet) {
-            $filtered[] = $tweet['url'];
-        }
-        return $filtered;
+        $this->rss = $rss;
     }
 
     /**
-     * Get array of Wallabag URL's
-     *
-     * @return array
+     * @param array $tweets
      */
-    private function getWallabagURLs(): array
+    public function setTweets(array $tweets): void
     {
-        $filtered = [];
-        foreach ($this->wallabag as $item) {
-            $filtered[] = $item['original_url'];
-        }
-        return $filtered;
+        $this->tweets = $tweets;
+    }
+
+    /**
+     * @param array $wallabag
+     */
+    public function setWallabag(array $wallabag): void
+    {
+        $this->wallabag = $wallabag;
     }
 
 

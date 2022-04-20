@@ -39,15 +39,15 @@ interface ProcessorInterface
     public function process(array $items): void;
 
     /**
-     * @param Logger $logger
-     */
-    public function setLogger(Logger $logger): void;
-
-    /**
      * @param string $destination
      * @return void
      */
     public function setDestination(string $destination): void;
+
+    /**
+     * @param Logger $logger
+     */
+    public function setLogger(Logger $logger): void;
 
     /**
      * @param int $length

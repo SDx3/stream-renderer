@@ -32,10 +32,10 @@ use Monolog\Logger;
 
 class FirefoxCollector implements CollectorInterface
 {
-    private Logger $logger;
-    private array  $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
     private array  $collection;
     private array  $configuration;
+    private array  $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
+    private Logger $logger;
 
     /**
      * @throws GuzzleException
@@ -146,31 +146,6 @@ class FirefoxCollector implements CollectorInterface
     }
 
     /**
-     * @inheritDoc
-     */
-    public function setConfiguration(array $configuration): void
-    {
-        $this->configuration = $configuration;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getCollection(): array
-    {
-        return $this->collection;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setLogger(Logger $logger): void
-    {
-        $this->logger = $logger;
-        $this->logger->debug('FirefoxCollector now has a logger!');
-    }
-
-    /**
      * @param array  $sorted
      * @param string $id
      * @param array  $tags
@@ -193,5 +168,30 @@ class FirefoxCollector implements CollectorInterface
 
         }
         return $tags;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCollection(): array
+    {
+        return $this->collection;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setConfiguration(array $configuration): void
+    {
+        $this->configuration = $configuration;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setLogger(Logger $logger): void
+    {
+        $this->logger = $logger;
+        $this->logger->debug('FirefoxCollector now has a logger!');
     }
 }

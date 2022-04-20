@@ -32,21 +32,12 @@ use Monolog\Logger;
 
 class WallabagCollector implements CollectorInterface
 {
+    private string $cacheFile;
+    private array  $collection;
     private array  $configuration = [];
     private Logger $logger;
     private bool   $skipCache;
-    private array  $collection;
-    private string $cacheFile;
     private array  $token;
-
-    /**
-     * @inheritDoc
-     */
-    public function setConfiguration(array $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->cacheFile     = sprintf('%s/wallabag.json', CACHE);
-    }
 
     /**
      * @inheritDoc
@@ -77,14 +68,6 @@ class WallabagCollector implements CollectorInterface
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getCollection(): array
-    {
-        return $this->collection;
-    }
-
-    /**
      * @return bool
      */
     private function cacheOutOfDate(): bool
@@ -106,6 +89,29 @@ class WallabagCollector implements CollectorInterface
         $this->logger->debug('WallabagCollector cache is fresh!');
 
         return false;
+    }
+
+    /**
+     *
+     */
+    private function getAccessToken(): void
+    {
+        $this->logger->debug('WallabagCollector will now get an access token.');
+        $client      = new Client;
+        $opts        = [
+            'form_params' => [
+                'grant_type'    => 'password',
+                'client_id'     => $this->configuration['client_id'],
+                'client_secret' => $this->configuration['client_secret'],
+                'username'      => $this->configuration['username'],
+                'password'      => $this->configuration['password'],
+            ],
+        ];
+        $url         = sprintf('%s/oauth/v2/token', $this->configuration['host']);
+        $response    = $client->post($url, $opts);
+        $body        = (string) $response->getBody();
+        $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
+        $this->logger->debug(sprintf('WallabagCollector has collected access token %s.', $this->token['access_token']));
     }
 
     /**
@@ -163,29 +169,6 @@ class WallabagCollector implements CollectorInterface
             $page++;
         }
         $this->logger->debug('WallabagCollector is done making articles public.');
-    }
-
-    /**
-     *
-     */
-    private function getAccessToken(): void
-    {
-        $this->logger->debug('WallabagCollector will now get an access token.');
-        $client      = new Client;
-        $opts        = [
-            'form_params' => [
-                'grant_type'    => 'password',
-                'client_id'     => $this->configuration['client_id'],
-                'client_secret' => $this->configuration['client_secret'],
-                'username'      => $this->configuration['username'],
-                'password'      => $this->configuration['password'],
-            ],
-        ];
-        $url         = sprintf('%s/oauth/v2/token', $this->configuration['host']);
-        $response    = $client->post($url, $opts);
-        $body        = (string) $response->getBody();
-        $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
-        $this->logger->debug(sprintf('WallabagCollector has collected access token %s.', $this->token['access_token']));
     }
 
     /**
@@ -271,16 +254,6 @@ class WallabagCollector implements CollectorInterface
         return $article;
     }
 
-
-    /**
-     * @inheritDoc
-     */
-    public function setLogger(Logger $logger): void
-    {
-        $this->logger = $logger;
-        $this->logger->debug('WallabagCollector has a logger!');
-    }
-
     /**
      *
      */
@@ -312,5 +285,31 @@ class WallabagCollector implements CollectorInterface
             $this->collection[$index] = $entry;
         }
 
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCollection(): array
+    {
+        return $this->collection;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setConfiguration(array $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->cacheFile     = sprintf('%s/wallabag.json', CACHE);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setLogger(Logger $logger): void
+    {
+        $this->logger = $logger;
+        $this->logger->debug('WallabagCollector has a logger!');
     }
 }
