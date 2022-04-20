@@ -11,4 +11,8 @@ categories:
 {% endfor %}
 
 ---
+{% if is_youtube %}
+{{ html|raw }}
+{% else %}
 Deze bookmark kan je vinden op [{{ host }}]({{ url }}).
+{% endif %}

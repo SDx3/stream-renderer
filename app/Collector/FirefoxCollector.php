@@ -26,6 +26,7 @@
 namespace App\Collector;
 
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Logger;
 
@@ -73,13 +74,34 @@ class FirefoxCollector implements CollectorInterface
                     continue 2;
                 }
             }
+
+            // special thing for youtube:
+            $isYoutube = false;
             if (str_starts_with($host, 'www.')) {
                 $host = substr($host, 4);
             }
+            if (str_contains($host, 'youtube.com')) {
+                $isYoutube = true;
+            }
+
+            $html = '';
+            if (true === $isYoutube) {
+                // get oEmbed for youtube movie:
+                $params = [
+                    'url'    => $bookmark['uri'],
+                    'format' => 'json',
+                ];
+                $url    = sprintf('https://www.youtube.com/oembed?%s', http_build_query($params));
+                $client = new Client;
+                $res    = $client->get($url);
+                $body   = (string) $res->getBody();
+                $json   = json_decode($body, true);
+                $html   = $json['html'];
+            }
 
             // get parent(s) as tags:
-            $tags                    = $bookmark['tags'];
-            $tags                    = $this->getTags($sorted, $bookmark['parent'], $tags);
+            $tags = $bookmark['tags'];
+            $tags = $this->getTags($sorted, $bookmark['parent'], $tags);
 
             // TODO filter on tags.
 
@@ -89,6 +111,8 @@ class FirefoxCollector implements CollectorInterface
                 'url'        => $bookmark['uri'],
                 'date'       => $bookmark['date'],
                 'host'       => $host,
+                'is_youtube' => $isYoutube,
+                'html'       => $html,
             ];
         }
         $this->logger->debug(sprintf('FirefoxCollector collected %d bookmark(s)', count($this->collection)));
