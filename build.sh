@@ -16,7 +16,9 @@ cd $SCRIPT_DIR/build
 # assume things have changed:
 git config --global user.email $GIT_EMAIL
 git config --global user.name $GIT_NAME
-git add content/stream/*.md
+cd $SCRIPT_DIR/build/content/stream
+git add -u .
+cd $SCRIPT_DIR/build
 git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 
 git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all
