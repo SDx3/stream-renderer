@@ -79,7 +79,7 @@ class PostFilter
     }
 
     /**
-     * Get array of Wallabag URL's
+     * Get array of Wallabag URL's. Not filtered.
      *
      * @return array
      */
@@ -109,7 +109,7 @@ class PostFilter
                 $include = false;
             }
             if (in_array($item['url'], $wallabag, true)) {
-                $this->logger->debug(sprintf('RSS collection will skip over "%s" because it\'s in Wallabag.', $item['url']));
+                $this->logger->debug(sprintf('RSS collection will skip over "%s" because it\'s also in Wallabag.', $item['url']));
                 $include = false;
             }
             if (true === $include) {
