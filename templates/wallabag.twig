@@ -3,6 +3,8 @@ title: "{% if title|length > title_length %}{{ title|slice(0,title_length)|raw }
 date: {{ date }}
 icon: article
 source: Wallabag
+domains:
+- {{ host }}
 src_url: "{{ wallabag_url }}"
 {{ year }}: "{{ month }}"
 categories:
