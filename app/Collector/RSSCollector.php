@@ -42,7 +42,7 @@ class RSSCollector implements CollectorInterface
      */
     public function collect(bool $skipCache = false): void
     {
-        $this->logger->debug('Now collecting...');
+        $this->logger->debug('Now collecting from RSS...');
         $link             = $this->configuration['feed'];
         $this->collection = [];
         $feed             = new SimplePie;
@@ -74,7 +74,7 @@ class RSSCollector implements CollectorInterface
             }
             $this->collection[] = $current;
         }
-        $this->logger->debug(sprintf('Done collecting, found %d item(s).', count($this->collection)));
+        $this->logger->debug(sprintf('Done collecting from RSS, found %d item(s).', count($this->collection)));
     }
 
     /**
