@@ -31,6 +31,7 @@ use Monolog\Logger;
 class PostFilter
 {
     private array  $bookmarks;
+    private array  $ignoreHosts;
     private Logger $logger;
     private array  $rss;
     private array  $tweets;
@@ -57,6 +58,10 @@ class PostFilter
                 $this->logger->debug(sprintf('Bookmark collection will skip over "%s" because it\'s in Wallabag.', $item['url']));
                 $include = false;
             }
+            if ($this->isIgnoredHost($item['host'])) {
+                $this->logger->debug(sprintf('Bookmark collection will skip over "%s" because it\'s an excluded host.', $item['url']));
+                $include = false;
+            }
             if (true === $include) {
                 $result[] = $item;
             }
@@ -65,7 +70,7 @@ class PostFilter
     }
 
     /**
-     * Get array of Tweet URL's.
+     * Get array of Tweet URL's. Used by other filters.
      *
      * @return array
      */
@@ -79,15 +84,15 @@ class PostFilter
     }
 
     /**
-     * Get array of Wallabag URL's. Not filtered.
+     * Get array of Wallabag URL's. Used by other filters.
      *
      * @return array
      */
     private function getWallabagURLs(): array
     {
         $filtered = [];
-        foreach ($this->wallabag as $item) {
-            $filtered[] = $item['original_url'];
+        foreach ($this->wallabag as $v) {
+            $filtered[] = $v['original_url'];
         }
         return $filtered;
     }
@@ -112,11 +117,30 @@ class PostFilter
                 $this->logger->debug(sprintf('RSS collection will skip over "%s" because it\'s also in Wallabag.', $item['url']));
                 $include = false;
             }
+            if ($this->isIgnoredHost($item['host'])) {
+                $this->logger->debug(sprintf('RSS collection will skip over "%s" because it\'s an excluded host.', $item['url']));
+                $include = false;
+            }
             if (true === $include) {
                 $result[] = $item;
             }
         }
         return $result;
+    }
+
+    /**
+     * @param string $host
+     * @return bool
+     */
+    private function isIgnoredHost(string $host): bool
+    {
+        // if host should be ignored, do so:
+        foreach ($this->ignoreHosts as $value) {
+            if (str_contains($host, $value)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -151,6 +175,10 @@ class PostFilter
             if ('twitter.com' === $host || 'www.twitter.com' === $host && true === $include) {
                 $this->logger->warning(sprintf('Found a tweet "%s" in Wallabag collection which is still included (not bookmarked).', $item['original_url']));
             }
+            if (true === $include && $this->isIgnoredHost($item['host'])) {
+                $this->logger->debug(sprintf('Wallabag collection will skip over "%s" because it\'s an excluded host.', $item['url']));
+                $include = false;
+            }
             if (true === $include) {
                 $result[] = $item;
             }
@@ -164,6 +192,14 @@ class PostFilter
     public function setBookmarks(array $bookmarks): void
     {
         $this->bookmarks = $bookmarks;
+    }
+
+    /**
+     * @param array $ignoreHosts
+     */
+    public function setIgnoreHosts(array $ignoreHosts): void
+    {
+        $this->ignoreHosts = $ignoreHosts;
     }
 
     /**

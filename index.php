@@ -121,6 +121,7 @@ if ('true' === $_ENV['RUN_RSS']) {
 // filter content:
 $filter = new PostFilter();
 $filter->setLogger($log);
+$filter->setIgnoreHosts(explode(',', $_ENV['EXCLUDE_HOSTS']));
 $filter->setWallabag($articles);
 $filter->setRss($feedArticles);
 $filter->setTweets($bookmarkedTweets);

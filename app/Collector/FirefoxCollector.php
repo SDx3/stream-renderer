@@ -68,12 +68,6 @@ class FirefoxCollector implements CollectorInterface
             }
 
             $host = parse_url($bookmark['uri'], PHP_URL_HOST);
-            foreach ($this->configuration['exclude_hosts'] as $current) {
-                if (str_contains($host, $current)) {
-                    $this->logger->debug(sprintf('Exclude bookmark with host "%s"', $host));
-                    continue 2;
-                }
-            }
 
             // special thing for youtube:
             $isYoutube = false;
