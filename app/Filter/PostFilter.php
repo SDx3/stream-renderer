@@ -137,10 +137,10 @@ class PostFilter
         // if host should be ignored, do so:
         foreach ($this->ignoreHosts as $value) {
             if (str_contains($host, $value)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     /**
