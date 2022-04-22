@@ -176,7 +176,7 @@ class PostFilter
                 $this->logger->warning(sprintf('Found a tweet "%s" in Wallabag collection which is still included (not bookmarked).', $item['original_url']));
             }
             if (true === $include && $this->isIgnoredHost($item['host'])) {
-                $this->logger->debug(sprintf('Wallabag collection will skip over "%s" because it\'s an excluded host.', $item['url']));
+                $this->logger->debug(sprintf('Wallabag collection will skip over "%s" because it\'s an excluded host.', $item['original_url']));
                 $include = false;
             }
             if (true === $include) {

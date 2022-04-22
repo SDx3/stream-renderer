@@ -17,7 +17,7 @@ cd $SCRIPT_DIR/build
 git config --global user.email $GIT_EMAIL
 git config --global user.name $GIT_NAME
 cd $SCRIPT_DIR/build/content/stream
-git add -u .
+git add -A .
 cd $SCRIPT_DIR/build
 git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 
