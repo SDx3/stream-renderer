@@ -15,6 +15,8 @@ It's all built using PHP. There are four collectors in the `app/Collector` folde
 
 The collectors do some collecting and the code in `app/Processor` does the processing: they generate little markdown files using the templates in `templates`. The end result is committed to the [GitHub repository](https://github.com/SDx3/sanderdorigo.nl/tree/main/content/stream) that holds my website and a GitHub action builds the website every night.
 
+Items can be excluded by domain or by tag. This is useful to prevent the sharing of private websites or sensitive bookmarks.
+
 So, essentially, when I bookmark a Tweet or share an article from an RSS feed, this script will pick it up and add it to my "[stream](https://www.sanderdorigo.nl/stream)". If you like what you see, you can also grab the [RSS-feed](https://www.sanderdorigo.nl/stream/index.xml) and add it to your favorite RSS reader.
 
 Enjoy!
