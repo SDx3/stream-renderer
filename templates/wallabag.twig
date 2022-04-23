@@ -9,7 +9,7 @@ src_url: "{{ wallabag_url }}"
 {{ year }}: "{{ month }}"
 categories:
 {% for tag in tags %}
-    - {{ tag }}
+    - "{{ tag }}"
 {% endfor %}
 ---
-Het oorspronkelijke artikel kan je lezen op [{{ host }}]({{ original_url }}) of [op Wallabag]({{ wallabag_url }}). De leestijd is ongeveer {{ reading_time }} {% if reading_time != 1 %}minuten{% else %}minuut{% endif %}.
+Het oorspronkelijke artikel kan je lezen op [{{ host }}]({{ url }}) of [op Wallabag]({{ wallabag_url }}). De leestijd is ongeveer {{ reading_time }} {% if reading_time != 1 %}minuten{% else %}minuut{% endif %}.

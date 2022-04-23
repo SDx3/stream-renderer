@@ -23,7 +23,33 @@
 
 namespace App\Processor;
 
+use Carbon\Carbon;
+
 trait ProcessorTrait
 {
+    /**
+     * @param Carbon $date
+     * @param string $type
+     * @param string $destination
+     * @return string
+     */
+    protected function getFileName(Carbon $date, string $type, string $destination): string
+    {
+        $formatted = $date->format('Y-m-d-H-i');
+        $filename  = sprintf('%s-%s.md', $formatted, $type);
+        $full      = sprintf('%s/%s', $destination, $filename);
+        if (!file_exists($full)) {
+            return $full;
+        }
+        $index      = 1;
+        $fileExists = true;
+        while ($index < 30 && $fileExists) {
+            $filename   = sprintf('%s-%s-%d.md', $formatted, $type, $index);
+            $full       = sprintf('%s/%s', $destination, $filename);
+            $fileExists = file_exists($full);
+            $index++;
+        }
+        return $full;
+    }
 
 }

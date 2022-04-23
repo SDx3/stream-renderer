@@ -40,7 +40,7 @@ use Monolog\Logger;
 /** @var Dotenv $dotenv */
 
 require 'init.php';
-
+$tags = include 'tags.php';
 $dotenv->safeLoad();
 
 if (false === realpath($_ENV['BLOG_PATH'])) {
@@ -84,11 +84,16 @@ if ('true' === $_ENV['RUN_TWITTER']) {
 if ('true' === $_ENV['RUN_WALLABAG']) {
     $collector     = new WallabagCollector;
     $configuration = [
-        'client_id'     => $_ENV['WALLABAG_CLIENT_ID'],
-        'client_secret' => $_ENV['WALLABAG_CLIENT_SECRET'],
-        'username'      => $_ENV['WALLABAG_USERNAME'],
-        'password'      => $_ENV['WALLABAG_PASSWORD'],
-        'host'          => $_ENV['WALLABAG_HOST'],
+        'client_id'      => $_ENV['WALLABAG_CLIENT_ID'],
+        'client_secret'  => $_ENV['WALLABAG_CLIENT_SECRET'],
+        'username'       => $_ENV['WALLABAG_USERNAME'],
+        'password'       => $_ENV['WALLABAG_PASSWORD'],
+        'host'           => $_ENV['WALLABAG_HOST'],
+        'pinboard_user'  => $_ENV['PINBOARD_USER'],
+        'pinboard_token' => $_ENV['PINBOARD_TOKEN'],
+        'run_pinboard'   => 'true' === $_ENV['RUN_PINBOARD'],
+        'allowed_tags'   => $tags['allowed'],
+        'blocked_tags'   => $tags['not-allowed'],
     ];
     $collector->setConfiguration($configuration);
     $collector->setLogger($log);

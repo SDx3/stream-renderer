@@ -92,7 +92,7 @@ class PostFilter
     {
         $filtered = [];
         foreach ($this->wallabag as $v) {
-            $filtered[] = $v['original_url'];
+            $filtered[] = $v['url'];
         }
         return $filtered;
     }
@@ -166,17 +166,17 @@ class PostFilter
         $tweets = $this->getTweetURLs();
         $result = [];
         foreach ($this->wallabag as $item) {
-            $host    = parse_url($item['original_url'], PHP_URL_HOST);
+            $host    = parse_url($item['url'], PHP_URL_HOST);
             $include = true;
-            if (in_array($item['original_url'], $tweets, true)) {
-                $this->logger->debug(sprintf('Wallabag collection will skip over "%s" because it\'s a tweet.', $item['original_url']));
+            if (in_array($item['url'], $tweets, true)) {
+                $this->logger->debug(sprintf('Wallabag collection will skip over "%s" because it\'s a tweet.', $item['url']));
                 $include = false;
             }
             if ('twitter.com' === $host || 'www.twitter.com' === $host && true === $include) {
-                $this->logger->warning(sprintf('Found a tweet "%s" in Wallabag collection which is still included (not bookmarked).', $item['original_url']));
+                $this->logger->warning(sprintf('Found a tweet "%s" in Wallabag collection which is still included (not bookmarked).', $item['url']));
             }
             if (true === $include && $this->isIgnoredHost($item['host'])) {
-                $this->logger->debug(sprintf('Wallabag collection will skip over "%s" because it\'s an excluded host.', $item['original_url']));
+                $this->logger->debug(sprintf('Wallabag collection will skip over "%s" because it\'s an excluded host.', $item['url']));
                 $include = false;
             }
             if (true === $include) {

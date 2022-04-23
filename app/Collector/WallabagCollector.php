@@ -25,19 +25,25 @@
 
 namespace App\Collector;
 
+use App\Data\PinBoard;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use JsonException;
 use Monolog\Logger;
 
+/**
+ * Class WallabagCollector
+ */
 class WallabagCollector implements CollectorInterface
 {
-    private string $cacheFile;
-    private array  $collection;
-    private array  $configuration = [];
-    private Logger $logger;
-    private bool   $skipCache;
-    private array  $token;
+    private string   $cacheFile;
+    private array    $collection;
+    private array    $configuration = [];
+    private Logger   $logger;
+    private bool     $skipCache;
+    private array    $token;
+    private PinBoard $pinBoard;
 
     /**
      * @inheritDoc
@@ -54,6 +60,15 @@ class WallabagCollector implements CollectorInterface
         if (false === $this->skipCache && $this->cacheOutOfDate()) {
             $useCache = false;
         }
+
+        // will always set up pinboard, even when it's not used.
+        $this->pinBoard = new PinBoard;
+        $this->pinBoard->setLogger($this->logger);
+        $this->pinBoard->setUser($this->configuration['pinboard_user']);
+        $this->pinBoard->setToken($this->configuration['pinboard_token']);
+        $this->pinBoard->setBlockedTags($this->configuration['blocked_tags']);
+        $this->pinBoard->setAllowedTags($this->configuration['allowed_tags']);
+
         if (false === $useCache) {
             $this->logger->debug('WallabagCollector will not use the cache.');
             $this->getAccessToken();
@@ -97,8 +112,8 @@ class WallabagCollector implements CollectorInterface
     private function getAccessToken(): void
     {
         $this->logger->debug('WallabagCollector will now get an access token.');
-        $client      = new Client;
-        $opts        = [
+        $client   = new Client;
+        $opts     = [
             'form_params' => [
                 'grant_type'    => 'password',
                 'client_id'     => $this->configuration['client_id'],
@@ -107,10 +122,15 @@ class WallabagCollector implements CollectorInterface
                 'password'      => $this->configuration['password'],
             ],
         ];
-        $url         = sprintf('%s/oauth/v2/token', $this->configuration['host']);
-        $response    = $client->post($url, $opts);
-        $body        = (string) $response->getBody();
-        $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
+        $url      = sprintf('%s/oauth/v2/token', $this->configuration['host']);
+        $response = $client->post($url, $opts);
+        $body     = (string) $response->getBody();
+        try {
+            $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            $this->logger->error('The Wallabag token is unexpectedly not JSON :( ');
+            exit;
+        }
         $this->logger->debug(sprintf('WallabagCollector has collected access token %s.', $this->token['access_token']));
     }
 
@@ -141,8 +161,15 @@ class WallabagCollector implements CollectorInterface
                 $page++;
                 continue;
             }
-            $body    = (string) $response->getBody();
-            $results = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            $body = (string) $response->getBody();
+            try {
+                $results = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException $e) {
+                $this->logger->error(sprintf('Page "%s" resulted in a JSON error ("%s"). Continue.', $url, $e->getMessage()));
+                $hasMore = false;
+                $page++;
+                continue;
+            }
 
             $this->logger->addRecord($results['total'] > 0 ? 200 : 100, sprintf('WallabagCollector found %d new article(s) to make public.', $results['total']));
 
@@ -193,7 +220,13 @@ class WallabagCollector implements CollectorInterface
             $url      = sprintf($articlesUrl, $this->configuration['host'], $page);
             $response = $client->get($url, $opts);
             $body     = (string) $response->getBody();
-            $results  = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            try {
+                $results = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException $e) {
+                $this->logger->error(sprintf('Page #%d has a JSON error: %s', $page, $e->getMessage()));
+                $page++;
+                continue;
+            }
 
             if (1 === $page) {
                 $this->logger->debug(sprintf('Found %d article(s) to share.', $results['total']));
@@ -230,7 +263,7 @@ class WallabagCollector implements CollectorInterface
         $article = [
             'type'         => 'wallabag',
             'title'        => $item['title'],
-            'original_url' => $item['url'],
+            'url'          => $item['url'],
             'host'         => $host,
             'reading_time' => $item['reading_time'],
             'date'         => new Carbon($item['created_at']), // mag ook "archived at" maar liever deze.
@@ -243,6 +276,15 @@ class WallabagCollector implements CollectorInterface
         foreach ($item['tags'] as $tag) {
             $article['tags'][] = $tag['label'];
         }
+        // if pinboard, expand list of tags:
+        if (true === $this->configuration['run_pinboard']) {
+            $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
+            $tags      = array_map('strtolower', $extraTags);
+            $tags      = array_unique(array_merge($article['tags'], $extraTags));
+            sort($tags);
+            $article['tags'] = $tags;
+        }
+
         /** @var array $annotation */
         foreach ($item['annotations'] as $annotation) {
             $article['annotations'][] = [
@@ -282,6 +324,7 @@ class WallabagCollector implements CollectorInterface
         $this->logger->debug('WallabagCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
             $entry['date']            = new Carbon($entry['date']);
+            $entry['tags']            = $this->pinBoard->filterTags($entry['tags']);
             $this->collection[$index] = $entry;
         }
 

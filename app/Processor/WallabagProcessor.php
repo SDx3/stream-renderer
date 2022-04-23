@@ -38,6 +38,8 @@ class WallabagProcessor implements ProcessorInterface
     private Logger $logger;
     private int    $titleLength = 50;
 
+    use ProcessorTrait;
+
     /**
      * @inheritDoc
      */
@@ -64,9 +66,7 @@ class WallabagProcessor implements ProcessorInterface
             $item['month']        = $item['date']->format('m');
             $item['title']        = str_replace($search, $replace, $item['title']);
             $content              = $template->render($item);
-            $date                 = $item['date']->format('Y-m-d-H-i');
-            $filename             = sprintf('%s-wallabag.md', $date);
-            $full                 = sprintf('%s/%s', $this->destination, $filename);
+            $full                 = $this->getFileName($item['date'], 'wallabag', $this->destination);
             file_put_contents($full, $content);
         }
         $this->logger->debug('Done!');
