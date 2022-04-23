@@ -208,6 +208,9 @@ class PinBoard
          * @var array  $values
          */
         foreach ($this->allowedTags as $key => $values) {
+            if (!is_array($values)) {
+                die(sprintf('Tag %s does not contain array: %s' . "\n", $key, $values));
+            }
             $values = array_map('strtolower', $values);
             if (strtolower($key) === $tag) {
                 return true;
