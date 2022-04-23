@@ -5,7 +5,7 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 mkdir -p $SCRIPT_DIR/build
 cd $SCRIPT_DIR/build
-git clone https://github.com/SDx3/sanderdorigo.nl.git . > /dev/null
+git clone https://github.com/SDx3/sanderdorigo.nl.git . > /dev/null 2>&1
 cd $SCRIPT_DIR
 
 php index.php
@@ -19,9 +19,9 @@ git config --global user.name $GIT_NAME
 cd $SCRIPT_DIR/build/content/stream
 git add -A . > /dev/null
 cd $SCRIPT_DIR/build
-git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > /dev/null
+git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > /dev/null 2>&1
 
-git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all > /dev/null
+git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all > /dev/null 2>&1
 
 # delete repos again
 cd $SCRIPT_DIR
