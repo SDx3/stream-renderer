@@ -25,6 +25,7 @@
 
 namespace App\Collector;
 
+use App\Data\PinBoard;
 use Carbon\Carbon;
 use DateTimeInterface;
 use GuzzleHttp\Client;
@@ -35,9 +36,10 @@ use Monolog\Logger;
  */
 class TwitterCollector implements CollectorInterface
 {
-    private array  $collection = [];
-    private array  $configuration;
-    private Logger $logger;
+    private array     $collection = [];
+    private array     $configuration;
+    private Logger    $logger;
+    private ?PinBoard $pinBoard;
 
     /**
      * @inheritDoc
@@ -222,13 +224,20 @@ class TwitterCollector implements CollectorInterface
         $res    = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=nl&dnt=true', $url));
         $body   = (string) $res->getBody();
         $json   = json_decode($body, true);
+
+        $tags = [];
+        if (null !== $this->pinBoard) {
+            $tags = $this->pinBoard->getTagsForUrl($url);
+        }
+
         return [
-            'id'     => $tweet['data']['id'],
-            'date'   => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at']),
-            'title'  => $tweet['data']['text'],
-            'author' => $authorName,
-            'url'    => $url,
-            'html'   => $json['html'],
+            'id'         => $tweet['data']['id'],
+            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at']),
+            'title'      => $tweet['data']['text'],
+            'author'     => $authorName,
+            'categories' => $tags,
+            'url'        => $url,
+            'html'       => $json['html'],
         ];
     }
 
@@ -268,5 +277,21 @@ class TwitterCollector implements CollectorInterface
     {
         $this->logger = $logger;
         $this->logger->debug('TwitterCollector now has a logger!');
+    }
+
+    /**
+     * @return PinBoard|null
+     */
+    public function getPinBoard(): ?PinBoard
+    {
+        return $this->pinBoard;
+    }
+
+    /**
+     * @param PinBoard|null $pinBoard
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
     }
 }

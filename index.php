@@ -65,6 +65,15 @@ $articles         = [];
 $bookmarks        = [];
 $feedArticles     = [];
 
+// create pinboard collection object
+$pinBoard = null;
+if ('true' === $_ENV['RUN_PINBOARD']) {
+    $pinBoard = new PinBoard;
+    $pinBoard->setLogger($log);
+    $pinBoard->setUser($_ENV['PINBOARD_USER']);
+    $pinBoard->setToken($_ENV['PINBOARD_TOKEN']);
+}
+
 // collect Twitter
 if ('true' === $_ENV['RUN_TWITTER']) {
     $collector = new TwitterCollector;
@@ -78,15 +87,12 @@ if ('true' === $_ENV['RUN_TWITTER']) {
     );
     $collector->collect();
     $bookmarkedTweets = $collector->getCollection();
-}
 
-$pinBoard = null;
-if ('true' === $_ENV['RUN_PINBOARD']) {
-    $pinBoard = new PinBoard;
-    $pinBoard->setLogger($log);
-    $pinBoard->setUser($_ENV['PINBOARD_USER']);
-    $pinBoard->setToken($_ENV['PINBOARD_TOKEN']);
+    // grab PinBoard instance from the Twitter collector. it will contain all the tags it found.
+    $pinBoard = $collector->getPinBoard();
 }
+$pinBoard?->saveBlockList();
+
 // collect Wallabag
 if ('true' === $_ENV['RUN_WALLABAG']) {
     $collector     = new WallabagCollector;
@@ -132,10 +138,14 @@ $pinBoard?->saveBlockList();
 if ('true' === $_ENV['RUN_RSS']) {
     $collector = new RSSCollector;
     $collector->setLogger($log);
+    $collector->setPinBoard($pinBoard);
     $collector->setConfiguration(['feed' => $_ENV['PUBLISHED_ARTICLES_FEED']]);
     $collector->collect();
     $feedArticles = $collector->getCollection();
+    $pinBoard = $collector->getPinBoard();
 }
+// make pinboard save its list of blocked tags:
+$pinBoard?->saveBlockList();
 
 // filter content:
 $filter = new PostFilter();

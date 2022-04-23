@@ -33,12 +33,12 @@ use Monolog\Logger;
 
 class FirefoxCollector implements CollectorInterface
 {
-    private array    $collection;
-    private array    $configuration;
-    private array    $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
-    private Logger   $logger;
+    private array     $collection;
+    private array     $configuration;
+    private array     $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
+    private Logger    $logger;
     private ?PinBoard $pinBoard;
-    private string   $cacheFile;
+    private string    $cacheFile;
 
     /**
      * @throws GuzzleException
@@ -135,7 +135,9 @@ class FirefoxCollector implements CollectorInterface
             $tags = $this->getTags($sorted, $bookmark['parent'], $tags);
 
             // add tags from pinboard:
-            $tags = $this->pinBoard->getTagsForUrl($bookmark['uri']);
+            if (null !== $this->pinBoard) {
+                $tags = array_unique(array_merge($tags, $this->pinBoard->getTagsForUrl($bookmark['uri'])));
+            }
 
             // TODO filter on tags.
 
@@ -306,8 +308,10 @@ class FirefoxCollector implements CollectorInterface
         $this->collection = $json['data'];
         $this->logger->debug('FirefoxCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
-            $entry['date']            = new Carbon($entry['date']);
-            $entry['categories']      = $this->pinBoard->filterTags($entry['categories']);
+            $entry['date'] = new Carbon($entry['date']);
+            if (null !== $this->pinBoard) {
+                $entry['categories'] = $this->pinBoard->filterTags($entry['categories']);
+            }
             $this->collection[$index] = $entry;
         }
 

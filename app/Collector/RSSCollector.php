@@ -25,6 +25,7 @@
 
 namespace App\Collector;
 
+use App\Data\PinBoard;
 use Carbon\Carbon;
 use Monolog\Logger;
 use SimplePie;
@@ -33,9 +34,10 @@ use SimplePie_Item;
 
 class RSSCollector implements CollectorInterface
 {
-    private array  $collection;
-    private array  $configuration;
-    private Logger $logger;
+    private array     $collection;
+    private array     $configuration;
+    private Logger    $logger;
+    private ?PinBoard $pinBoard;
 
     /**
      * @inheritDoc
@@ -59,19 +61,26 @@ class RSSCollector implements CollectorInterface
             }
 
             $current = [
-                'url'        => $item->get_permalink(),
-                'date'       => Carbon::createFromFormat('Y-m-d H:i:s', $item->get_date('Y-m-d H:i:s')),
-                'title'      => $item->get_title(),
-                'host'       => $host,
-                'content'    => strip_tags($item->get_description(true)),
-                'categories' => [],
+                'url'     => $item->get_permalink(),
+                'date'    => Carbon::createFromFormat('Y-m-d H:i:s', $item->get_date('Y-m-d H:i:s')),
+                'title'   => $item->get_title(),
+                'host'    => $host,
+                'content' => strip_tags($item->get_description(true)),
+                'tags'    => [],
             ];
             /** @var SimplePie_Category $cat */
             if (null !== $item->get_categories()) {
                 foreach ($item->get_categories() as $cat) {
-                    $current['categories'][] = $cat->get_label();
+                    $current['tags'][] = $cat->get_label();
                 }
             }
+
+            // get tags from Pinboard:
+            if (null !== $this->pinBoard) {
+                $current['tags'] = array_unique(array_merge($current['tags'], $this->pinBoard->getTagsForUrl($current['url'])));
+            }
+
+
             $this->collection[] = $current;
         }
         $this->logger->debug(sprintf('Done collecting from RSS, found %d item(s).', count($this->collection)));
@@ -100,5 +109,21 @@ class RSSCollector implements CollectorInterface
     {
         $this->logger = $logger;
         $this->logger->debug('RSSCollector now has a logger!');
+    }
+
+    /**
+     * @return PinBoard
+     */
+    public function getPinBoard(): PinBoard
+    {
+        return $this->pinBoard;
+    }
+
+    /**
+     * @param null|PinBoard $pinBoard
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
     }
 }

@@ -82,6 +82,9 @@ class PinBoard
             'url'        => $url,
             'format'     => 'json',
             'auth_token' => sprintf('%s:%s', $this->user, $this->token),
+            'headers' => [
+                'User-Agent' => 'sanderdorigo.nl tag collector / 0.1 github.com/SDx3/stream-renderer',
+            ],
         ];
         $api    = sprintf('https://api.pinboard.in/v1/posts/suggest?%s', http_build_query($params));
         $client = new Client();
