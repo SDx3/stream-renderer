@@ -78,6 +78,7 @@ if ('true' === $_ENV['RUN_PINBOARD']) {
 if ('true' === $_ENV['RUN_TWITTER']) {
     $collector = new TwitterCollector;
     $collector->setLogger($log);
+    $collector->setPinBoard($pinBoard);
     $collector->setConfiguration(
         [
             'client_id'     => $_ENV['TWITTER_CLIENT_ID'],
