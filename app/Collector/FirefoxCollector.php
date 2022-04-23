@@ -37,7 +37,7 @@ class FirefoxCollector implements CollectorInterface
     private array    $configuration;
     private array    $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
     private Logger   $logger;
-    private PinBoard $pinBoard;
+    private ?PinBoard $pinBoard;
     private string   $cacheFile;
 
     /**
