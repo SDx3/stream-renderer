@@ -99,8 +99,8 @@ class PinBoard
             $tags = array_merge($tags, $json[0]['popular']);
             $tags = array_merge($tags, $json[1]['recommended']);
             $tags = $this->filterTags($tags);
-            $this->logger->debug('Sleep for 1sec...');
-            sleep(1);
+            $this->logger->debug('Sleep for .5sec...');
+            usleep(500000);
         }
 
         return $this->filterTags($tags);

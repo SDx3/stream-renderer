@@ -64,8 +64,6 @@ class FirefoxCollector implements CollectorInterface
             $this->logger->debug('FirefoxCollector will use the cache.');
             $this->collectCache();
         }
-
-        exit;
     }
 
     /**

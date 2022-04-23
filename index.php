@@ -41,7 +41,6 @@ use Monolog\Logger;
 /** @var Dotenv $dotenv */
 
 require 'init.php';
-$tags = include 'tags.php';
 $dotenv->safeLoad();
 
 if (false === realpath($_ENV['BLOG_PATH'])) {
