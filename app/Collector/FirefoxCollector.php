@@ -38,13 +38,42 @@ class FirefoxCollector implements CollectorInterface
     private array    $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
     private Logger   $logger;
     private PinBoard $pinBoard;
+    private string   $cacheFile;
 
     /**
      * @throws GuzzleException
      */
     public function collect(bool $skipCache = false): void
     {
+        $this->logger->debug('FirefoxCollector is going to collect.');
+        $useCache = true;
 
+        if (true === $skipCache) {
+            $useCache = false;
+        }
+        if (false === $skipCache && $this->cacheOutOfDate()) {
+            $useCache = false;
+        }
+
+        if (false === $useCache) {
+            $this->logger->debug('FirefoxCollector will not use the cache.');
+            $this->collectBookmarks();
+            $this->saveToCache();
+        }
+        if (true === $useCache) {
+            $this->logger->debug('FirefoxCollector will use the cache.');
+            $this->collectCache();
+        }
+
+        exit;
+    }
+
+    /**
+     * @return void
+     * @throws GuzzleException
+     */
+    private function collectBookmarks(): void
+    {
         $this->collection = [];
         $file             = sprintf('%s/%s', ROOT, 'bookmarks.json');
         $body             = file_get_contents($file);
@@ -52,7 +81,8 @@ class FirefoxCollector implements CollectorInterface
         $sorted           = [];
         $sorted           = $this->processChildren('(root)', $json, $sorted);
         $total            = count($sorted);
-        foreach ($sorted as $index => $bookmark) {
+        $index            = 0;
+        foreach ($sorted as $bookmark) {
             // if not a bookmark, continue:
             if ('text/x-moz-place' !== $bookmark['type']) {
                 continue;
@@ -120,6 +150,7 @@ class FirefoxCollector implements CollectorInterface
                 'is_youtube' => $isYoutube,
                 'html'       => $html,
             ];
+            $index++;
         }
         $this->logger->debug(sprintf('FirefoxCollector collected %d bookmark(s)', count($this->collection)));
     }
@@ -197,6 +228,7 @@ class FirefoxCollector implements CollectorInterface
     public function setConfiguration(array $configuration): void
     {
         $this->configuration = $configuration;
+        $this->cacheFile     = sprintf('%s/bookmarks-cache.json', CACHE);
     }
 
     /**
@@ -223,6 +255,64 @@ class FirefoxCollector implements CollectorInterface
     public function getPinBoard(): PinBoard
     {
         return $this->pinBoard;
+    }
+
+    /**
+     * @return bool
+     */
+    private function cacheOutOfDate(): bool
+    {
+        if (!file_exists($this->cacheFile)) {
+            $this->logger->debug('FirefoxCollector found no cache file, so it\'s out of date.');
+            return true;
+        }
+        $content = file_get_contents($this->cacheFile);
+        $json    = json_decode($content, true, 128);
+        if (false === $json) {
+            return true;
+        }
+        // diff is over 12hrs
+        if (time() - $json['moment'] > (12 * 60 * 60)) {
+            $this->logger->debug('FirefoxCollector cache is outdated.');
+            return true;
+        }
+        $this->logger->debug('FirefoxCollector cache is fresh!');
+
+        return false;
+    }
+
+    /**
+     *
+     */
+    private function saveToCache(): void
+    {
+        $content = [
+            'moment' => time(),
+            'data'   => $this->collection,
+        ];
+        $json    = json_encode($content, JSON_PRETTY_PRINT);
+        file_put_contents($this->cacheFile, $json);
+        $this->logger->debug('FirefoxCollector has saved the results to the cache.');
+    }
+
+    /**
+     * @return void
+     */
+    private function collectCache(): void
+    {
+        $content = file_get_contents($this->cacheFile);
+        $json    = json_decode($content, true, 128);
+        if (false === $json) {
+            return;
+        }
+        $this->collection = $json['data'];
+        $this->logger->debug('FirefoxCollector has collected from the cache.');
+        foreach ($this->collection as $index => $entry) {
+            $entry['date']            = new Carbon($entry['date']);
+            $entry['categories']      = $this->pinBoard->filterTags($entry['categories']);
+            $this->collection[$index] = $entry;
+        }
+
     }
 
 }
