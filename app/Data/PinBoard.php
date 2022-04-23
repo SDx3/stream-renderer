@@ -32,17 +32,29 @@ use Monolog\Logger;
  */
 class PinBoard
 {
-    private array  $allowedTags;
-    private array  $blockedTags;
+    private array  $allowedTags = [];
+    private array  $blockedTags = [];
     private Logger $logger;
     private string $token;
     private string $user;
+    private string $cacheFile;
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        $this->cacheFile   = sprintf('%s/tags.json', CACHE);
+        $tags              = include(ROOT . '/tags.php');
+        $this->allowedTags = $tags['allowed'];
+        $this->getCache();
+    }
 
     /**
      * @param array $articles
      * @return array
      */
-    public function addTagsToList(array $articles): array
+    public function XaddTagsToList(array $articles): array
     {
         $all   = [];
         $index = 0;
@@ -95,6 +107,10 @@ class PinBoard
     }
 
     /**
+     * Will take the tags from the (cached) post and return only the tags that are allowed.
+     * Tags that are in the cache file will be ignored (unless allowed). Newly found tags
+     * will get a shout-out.
+     *
      * @param array $tags
      * @return array
      */
@@ -117,7 +133,7 @@ class PinBoard
     /**
      * @param array $allowedTags
      */
-    public function setAllowedTags(array $allowedTags): void
+    public function XsetAllowedTags(array $allowedTags): void
     {
         $this->allowedTags = $allowedTags;
     }
@@ -125,9 +141,20 @@ class PinBoard
     /**
      * @param array $blockedTags
      */
-    public function setBlockedTags(array $blockedTags): void
+    public function XsetBlockedTags(array $blockedTags): void
     {
         $this->blockedTags = $blockedTags;
+    }
+
+    /**
+     * @return void
+     */
+    public function saveBlockList(): void
+    {
+        $list = array_unique($this->blockedTags);
+        $list = array_map('strtolower', $list);
+        sort($list);
+        file_put_contents($this->cacheFile, json_encode($list, JSON_PRETTY_PRINT));
     }
 
     /**
@@ -198,8 +225,27 @@ class PinBoard
      */
     private function tagIsBlocked(string $tag): bool
     {
-        $tags = array_map('strtolower', $this->blockedTags);
-        return in_array($tag, $tags, true);
+        $blocked = in_array($tag, $this->blockedTags, true);
+        $allowed = $this->tagIsAllowed($tag);
+        if ($blocked && !$allowed) {
+            return true;
+        }
+        if (!$blocked && !$allowed) {
+            $this->logger->info(sprintf('Never heard about tag "%s"', $tag));
+            // add it to the blocked tags:
+            $this->blockedTags[] = trim(strtolower($tag));
+            return true;
+        }
+        return false;
+    }
+
+    private function getCache(): void
+    {
+        $this->blockedTags = [];
+        if (file_exists($this->cacheFile)) {
+            $content           = file_get_contents($this->cacheFile);
+            $this->blockedTags = json_decode($content, true);
+        }
     }
 
 

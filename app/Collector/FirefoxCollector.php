@@ -25,6 +25,7 @@
 
 namespace App\Collector;
 
+use App\Data\PinBoard;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -32,23 +33,26 @@ use Monolog\Logger;
 
 class FirefoxCollector implements CollectorInterface
 {
-    private array  $collection;
-    private array  $configuration;
-    private array  $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
-    private Logger $logger;
+    private array    $collection;
+    private array    $configuration;
+    private array    $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
+    private Logger   $logger;
+    private PinBoard $pinBoard;
 
     /**
      * @throws GuzzleException
      */
     public function collect(bool $skipCache = false): void
     {
+
         $this->collection = [];
         $file             = sprintf('%s/%s', ROOT, 'bookmarks.json');
         $body             = file_get_contents($file);
         $json             = json_decode($body, true, 25);
         $sorted           = [];
         $sorted           = $this->processChildren('(root)', $json, $sorted);
-        foreach ($sorted as $bookmark) {
+        $total            = count($sorted);
+        foreach ($sorted as $index => $bookmark) {
             // if not a bookmark, continue:
             if ('text/x-moz-place' !== $bookmark['type']) {
                 continue;
@@ -63,10 +67,9 @@ class FirefoxCollector implements CollectorInterface
             // if already in collection, continue (duplicate bookmark):
             $hash = sha1($bookmark['uri']);
             if (in_array($hash, $this->collection)) {
-                $this->logger->debug(sprintf('Skip "%s", already in collection.', $bookmark['title']));
                 continue;
             }
-
+            $this->logger->debug(sprintf('[%d/%d] Processing bookmark.', ($index + 1), $total));
             $host = parse_url($bookmark['uri'], PHP_URL_HOST);
 
             // special thing for youtube:
@@ -103,6 +106,9 @@ class FirefoxCollector implements CollectorInterface
             $tags = $bookmark['tags'];
             $tags = $this->getTags($sorted, $bookmark['parent'], $tags);
 
+            // add tags from pinboard:
+            $tags = $this->pinBoard->getTagsForUrl($bookmark['uri']);
+
             // TODO filter on tags.
 
             $this->collection[$hash] = [
@@ -118,6 +124,12 @@ class FirefoxCollector implements CollectorInterface
         $this->logger->debug(sprintf('FirefoxCollector collected %d bookmark(s)', count($this->collection)));
     }
 
+    /**
+     * @param string $parentId
+     * @param array  $set
+     * @param array  $sorted
+     * @return array
+     */
     private function processChildren(string $parentId, array $set, array $sorted): array
     {
         $guid   = $set['guid'] ?? '(empty)';
@@ -165,8 +177,9 @@ class FirefoxCollector implements CollectorInterface
                 // then find the parent as well:
                 $tags = $this->getTags($sorted, $entry['parent'], $tags);
             }
-
         }
+
+
         return $tags;
     }
 
@@ -194,4 +207,22 @@ class FirefoxCollector implements CollectorInterface
         $this->logger = $logger;
         $this->logger->debug('FirefoxCollector now has a logger!');
     }
+
+    /**
+     * @param PinBoard|null $pinBoard
+     * @return void
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
+    }
+
+    /**
+     * @return PinBoard
+     */
+    public function getPinBoard(): PinBoard
+    {
+        return $this->pinBoard;
+    }
+
 }

@@ -28,6 +28,7 @@ use App\Collector\FirefoxCollector;
 use App\Collector\RSSCollector;
 use App\Collector\TwitterCollector;
 use App\Collector\WallabagCollector;
+use App\Data\PinBoard;
 use App\Filter\PostFilter;
 use App\Processor\FirefoxProcessor;
 use App\Processor\RSSProcessor;
@@ -80,31 +81,41 @@ if ('true' === $_ENV['RUN_TWITTER']) {
     $bookmarkedTweets = $collector->getCollection();
 }
 
+$pinBoard = null;
+if ('true' === $_ENV['RUN_PINBOARD']) {
+    $pinBoard = new PinBoard;
+    $pinBoard->setLogger($log);
+    $pinBoard->setUser($_ENV['PINBOARD_USER']);
+    $pinBoard->setToken($_ENV['PINBOARD_TOKEN']);
+}
 // collect Wallabag
 if ('true' === $_ENV['RUN_WALLABAG']) {
     $collector     = new WallabagCollector;
     $configuration = [
-        'client_id'      => $_ENV['WALLABAG_CLIENT_ID'],
-        'client_secret'  => $_ENV['WALLABAG_CLIENT_SECRET'],
-        'username'       => $_ENV['WALLABAG_USERNAME'],
-        'password'       => $_ENV['WALLABAG_PASSWORD'],
-        'host'           => $_ENV['WALLABAG_HOST'],
-        'pinboard_user'  => $_ENV['PINBOARD_USER'],
-        'pinboard_token' => $_ENV['PINBOARD_TOKEN'],
-        'run_pinboard'   => 'true' === $_ENV['RUN_PINBOARD'],
-        'allowed_tags'   => $tags['allowed'],
-        'blocked_tags'   => $tags['not-allowed'],
+        'client_id'     => $_ENV['WALLABAG_CLIENT_ID'],
+        'client_secret' => $_ENV['WALLABAG_CLIENT_SECRET'],
+        'username'      => $_ENV['WALLABAG_USERNAME'],
+        'password'      => $_ENV['WALLABAG_PASSWORD'],
+        'host'          => $_ENV['WALLABAG_HOST'],
     ];
     $collector->setConfiguration($configuration);
     $collector->setLogger($log);
+    $collector->setPinBoard($pinBoard);
     $collector->collect();
     $articles = $collector->getCollection();
+
+    // grab PinBoard instance from the Wallabag collector. it will contain all the tags it found.
+    $pinBoard = $collector->getPinBoard();
 }
+
+// make pinboard save its list of blocked tags:
+$pinBoard?->saveBlockList();
 
 // collect bookmarks
 if ('true' === $_ENV['RUN_BOOKMARKS']) {
     $collector = new FirefoxCollector();
     $collector->setLogger($log);
+    $collector->setPinBoard($pinBoard);
     $collector->setConfiguration(
         [
             'exclude_hosts' => explode(',', $_ENV['EXCLUDE_HOSTS']),
@@ -112,7 +123,11 @@ if ('true' === $_ENV['RUN_BOOKMARKS']) {
     );
     $collector->collect();
     $bookmarks = $collector->getCollection();
+    $pinBoard = $collector->getPinBoard();
 }
+
+// make pinboard save its list of blocked tags:
+$pinBoard?->saveBlockList();
 
 // collect RSS
 if ('true' === $_ENV['RUN_RSS']) {

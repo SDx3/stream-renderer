@@ -41,9 +41,8 @@ class WallabagCollector implements CollectorInterface
     private array    $collection;
     private array    $configuration = [];
     private Logger   $logger;
-    private bool     $skipCache;
     private array    $token;
-    private PinBoard $pinBoard;
+    private ?PinBoard $pinBoard;
 
     /**
      * @inheritDoc
@@ -51,23 +50,14 @@ class WallabagCollector implements CollectorInterface
     public function collect(bool $skipCache = false): void
     {
         $this->logger->debug('WallabagCollector is going to collect.');
-        $this->skipCache = $skipCache;
         $useCache        = true;
 
-        if (true === $this->skipCache) {
+        if (true === $skipCache) {
             $useCache = false;
         }
-        if (false === $this->skipCache && $this->cacheOutOfDate()) {
+        if (false === $skipCache && $this->cacheOutOfDate()) {
             $useCache = false;
         }
-
-        // will always set up pinboard, even when it's not used.
-        $this->pinBoard = new PinBoard;
-        $this->pinBoard->setLogger($this->logger);
-        $this->pinBoard->setUser($this->configuration['pinboard_user']);
-        $this->pinBoard->setToken($this->configuration['pinboard_token']);
-        $this->pinBoard->setBlockedTags($this->configuration['blocked_tags']);
-        $this->pinBoard->setAllowedTags($this->configuration['allowed_tags']);
 
         if (false === $useCache) {
             $this->logger->debug('WallabagCollector will not use the cache.');
@@ -88,7 +78,7 @@ class WallabagCollector implements CollectorInterface
     private function cacheOutOfDate(): bool
     {
         if (!file_exists($this->cacheFile)) {
-            $this->logger->debug('WallabagCollector found no cache file, so its out of date.');
+            $this->logger->debug('WallabagCollector found no cache file, so it\'s out of date.');
             return true;
         }
         $content = file_get_contents($this->cacheFile);
@@ -276,8 +266,9 @@ class WallabagCollector implements CollectorInterface
         foreach ($item['tags'] as $tag) {
             $article['tags'][] = $tag['label'];
         }
-        // if pinboard, expand list of tags:
-        if (true === $this->configuration['run_pinboard']) {
+
+        // if pinboard, expand list of tags with what we found online:
+        if (null !== $this->pinBoard) {
             $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
             $tags      = array_map('strtolower', $extraTags);
             $tags      = array_unique(array_merge($article['tags'], $extraTags));
@@ -354,5 +345,21 @@ class WallabagCollector implements CollectorInterface
     {
         $this->logger = $logger;
         $this->logger->debug('WallabagCollector has a logger!');
+    }
+
+    /**
+     * @param PinBoard|null $pinBoard
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
+    }
+
+    /**
+     * @return PinBoard|null
+     */
+    public function getPinBoard(): ?PinBoard
+    {
+        return $this->pinBoard;
     }
 }
