@@ -99,7 +99,6 @@ return [
         'critical-thought'       => ['critical', 'critique', 'resist'],
         'crowd'                  => [],
         'cryptanalysis'          => [],
-        'crypto'                 => [],
         'crypto-currencies'      => ['cryptocurrencies', 'ethereum', 'crypto-currency', 'cryptocurrency', 'crypto', 'coins'],
         'cryptozoology'          => [],
         'csam'                   => [],
@@ -260,8 +259,7 @@ return [
         'programming'              => [],
 
         // Q
-        'quantum'                  => [],
-        'quantum-cryptography'     => ['quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum'],
+        'quantum-cryptography'     => ['quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum'],
         'quantum-key-distribution' => ['qkd'],
 
         // R
