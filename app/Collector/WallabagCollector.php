@@ -271,7 +271,7 @@ class WallabagCollector implements CollectorInterface
         if (null !== $this->pinBoard) {
             $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
             $tags      = array_map('strtolower', $extraTags);
-            $tags      = array_unique(array_merge($article['tags'], $extraTags));
+            $tags      = array_unique(array_merge($article['tags'], $tags));
             sort($tags);
             $article['tags'] = $tags;
         }

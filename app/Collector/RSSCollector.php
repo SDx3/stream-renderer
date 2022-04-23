@@ -79,6 +79,7 @@ class RSSCollector implements CollectorInterface
             if (null !== $this->pinBoard) {
                 $current['tags'] = array_unique(array_merge($current['tags'], $this->pinBoard->getTagsForUrl($current['url'])));
             }
+            sort($current['tags']);
 
 
             $this->collection[] = $current;

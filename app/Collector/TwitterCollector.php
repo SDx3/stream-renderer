@@ -229,6 +229,7 @@ class TwitterCollector implements CollectorInterface
         if (null !== $this->pinBoard) {
             $tags = $this->pinBoard->getTagsForUrl($url);
         }
+        sort($tags);
 
         return [
             'id'         => $tweet['data']['id'],

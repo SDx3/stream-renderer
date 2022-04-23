@@ -138,6 +138,7 @@ class FirefoxCollector implements CollectorInterface
             if (null !== $this->pinBoard) {
                 $tags = array_unique(array_merge($tags, $this->pinBoard->getTagsForUrl($bookmark['uri'])));
             }
+            sort($tags);
 
             // TODO filter on tags.
 
