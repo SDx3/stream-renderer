@@ -52,7 +52,7 @@ return [
         'banking'                => ['banks', 'finance', 'betaalverkeer'],
         'bayesian'               => ['@bayesian', 'bayes'],
         'blockchain'             => ['blockchains', 'block'],
-        'books'                  => ['book','boeken'],
+        'books'                  => ['book', 'boeken'],
         'bots'                   => ['bot', 'chatbot', 'chatbots'],
         'best-practice'          => ['best-practices', 'bestpractices', 'bestpractice'],
         'behavior'               => [],
@@ -171,6 +171,7 @@ return [
         'gnupg'                  => ['gpg', 'openpgp', 'pgp'],
         'google'                 => [],
         'government'             => ['overheid'],
+        'geopolitics'            => [],
 
         // H
 

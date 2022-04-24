@@ -37,16 +37,19 @@ class PinBoard
     private Logger $logger;
     private string $token;
     private string $user;
-    private string $cacheFile;
+    private string $tagCacheFile;
+    private string $urlCacheFile;
+    private array  $urls;
 
     /**
      *
      */
     public function __construct()
     {
-        $this->cacheFile   = sprintf('%s/tags.json', CACHE);
-        $tags              = include(ROOT . '/tags.php');
-        $this->allowedTags = $tags['allowed'];
+        $this->tagCacheFile = sprintf('%s/tags.json', CACHE);
+        $this->urlCacheFile = sprintf('%s/urls.json', CACHE);
+        $tags               = include(ROOT . '/tags.php');
+        $this->allowedTags  = $tags['allowed'];
         $this->getCache();
     }
 
@@ -78,11 +81,17 @@ class PinBoard
     public function getTagsForUrl(string $url): array
     {
         $this->logger->debug(sprintf('Checking tags for URL %s...', $url));
+        $hash = sha1($url);
+        if (array_key_exists($hash, $this->urls)) {
+            $this->logger->debug(sprintf('Return from cache: %s', join(', ', $this->urls[$hash])));
+            return $this->urls[$hash];
+        }
+
         $params = [
             'url'        => $url,
             'format'     => 'json',
             'auth_token' => sprintf('%s:%s', $this->user, $this->token),
-            'headers' => [
+            'headers'    => [
                 'User-Agent' => 'sanderdorigo.nl tag collector / 0.1 github.com/SDx3/stream-renderer',
             ],
         ];
@@ -105,8 +114,10 @@ class PinBoard
             $this->logger->debug('Sleep for .5sec...');
             usleep(500000);
         }
+        $result            = $this->filterTags($tags);
+        $this->urls[$hash] = $result;
+        return $result;
 
-        return $this->filterTags($tags);
     }
 
     /**
@@ -152,12 +163,15 @@ class PinBoard
     /**
      * @return void
      */
-    public function saveBlockList(): void
+    public function saveCache(): void
     {
         $list = array_unique($this->blockedTags);
         $list = array_map('strtolower', $list);
         sort($list);
-        file_put_contents($this->cacheFile, json_encode($list, JSON_PRETTY_PRINT));
+        file_put_contents($this->tagCacheFile, json_encode($list, JSON_PRETTY_PRINT));
+
+        // same for url list:
+        file_put_contents($this->urlCacheFile, json_encode($this->urls, JSON_PRETTY_PRINT));
     }
 
     /**
@@ -216,12 +230,15 @@ class PinBoard
             }
             $values = array_map('strtolower', $values);
             if (strtolower($key) === $tag) {
+                $this->logger->debug(sprintf('Allowed [primary]   : "%s"', $tag));
                 return true;
             }
             if (in_array($tag, $values, true)) {
+                $this->logger->debug(sprintf('Allowed [secondary] : "%s" (%s)', $tag, join(', ', $values)));
                 return true;
             }
         }
+        $this->logger->info(sprintf('BLOCKED             : "%s"', $tag));
         return false;
     }
 
@@ -237,7 +254,7 @@ class PinBoard
             return true;
         }
         if (!$blocked && !$allowed) {
-            $this->logger->info(sprintf('Never heard about tag "%s"', $tag));
+            $this->logger->info(sprintf('New!                : "%s"', $tag));
             // add it to the blocked tags:
             $this->blockedTags[] = trim(strtolower($tag));
             return true;
@@ -248,10 +265,16 @@ class PinBoard
     private function getCache(): void
     {
         $this->blockedTags = [];
-        if (file_exists($this->cacheFile)) {
-            $content           = file_get_contents($this->cacheFile);
+        $this->urls        = [];
+        if (file_exists($this->tagCacheFile)) {
+            $content           = file_get_contents($this->tagCacheFile);
             $this->blockedTags = json_decode($content, true);
         }
+        if (file_exists($this->urlCacheFile)) {
+            $content    = file_get_contents($this->urlCacheFile);
+            $this->urls = json_decode($content, true);
+        }
+
     }
 
 

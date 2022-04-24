@@ -92,7 +92,7 @@ if ('true' === $_ENV['RUN_TWITTER']) {
     // grab PinBoard instance from the Twitter collector. it will contain all the tags it found.
     $pinBoard = $collector->getPinBoard();
 }
-$pinBoard?->saveBlockList();
+$pinBoard?->saveCache();
 
 // collect Wallabag
 if ('true' === $_ENV['RUN_WALLABAG']) {
@@ -115,7 +115,7 @@ if ('true' === $_ENV['RUN_WALLABAG']) {
 }
 
 // make pinboard save its list of blocked tags:
-$pinBoard?->saveBlockList();
+$pinBoard?->saveCache();
 
 // collect bookmarks
 if ('true' === $_ENV['RUN_BOOKMARKS']) {
@@ -133,7 +133,7 @@ if ('true' === $_ENV['RUN_BOOKMARKS']) {
 }
 
 // make pinboard save its list of blocked tags:
-$pinBoard?->saveBlockList();
+$pinBoard?->saveCache();
 
 // collect RSS
 if ('true' === $_ENV['RUN_RSS']) {
@@ -146,7 +146,7 @@ if ('true' === $_ENV['RUN_RSS']) {
     $pinBoard = $collector->getPinBoard();
 }
 // make pinboard save its list of blocked tags:
-$pinBoard?->saveBlockList();
+$pinBoard?->saveCache();
 
 // filter content:
 $filter = new PostFilter();
