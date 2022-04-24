@@ -148,6 +148,9 @@ class PinBoard
      */
     public function filterTags(array $tags): array
     {
+        if (0 === count($tags)) {
+            return [];
+        }
         $tags = array_unique($tags);
         $tags = array_map('strtolower', $tags);
         $this->logger->debug(sprintf('Will now filter set: %s', join(', ', $tags)));
