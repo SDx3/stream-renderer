@@ -2,11 +2,25 @@
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-
+# clone GitHub repository
+rm -rf $SCRIPT_DIR/build
 mkdir -p $SCRIPT_DIR/build
 cd $SCRIPT_DIR/build
 git clone https://github.com/SDx3/sanderdorigo.nl.git . > /dev/null 2>&1
 cd $SCRIPT_DIR
+
+if [ "$1" == "--clean" ]; then
+    echo "Will remove cache before continuing."
+    rm -f $SCRIPT_DIR/tags.json
+    rm -f $SCRIPT_DIR/urls.json
+    rm -f $SCRIPT_DIR/twitter-cache.json
+    rm -f $SCRIPT_DIR/wallabag.json
+    rm -f $SCRIPT_DIR/bookmarks-cache.json
+    echo "Done!"
+fi
+
+
+exit
 
 php index.php
 
