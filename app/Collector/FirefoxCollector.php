@@ -33,12 +33,12 @@ use Monolog\Logger;
 
 class FirefoxCollector implements CollectorInterface
 {
+    private string    $cacheFile;
     private array     $collection;
     private array     $configuration;
     private array     $excludeTags = ['bookmarks menu', 'bookmarks bar', 'mobile bookmarks'];
     private Logger    $logger;
     private ?PinBoard $pinBoard;
-    private string    $cacheFile;
 
     /**
      * @throws GuzzleException
@@ -64,6 +64,30 @@ class FirefoxCollector implements CollectorInterface
             $this->logger->debug('FirefoxCollector will use the cache.');
             $this->collectCache();
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function cacheOutOfDate(): bool
+    {
+        if (!file_exists($this->cacheFile)) {
+            $this->logger->debug('FirefoxCollector found no cache file, so it\'s out of date.');
+            return true;
+        }
+        $content = file_get_contents($this->cacheFile);
+        $json    = json_decode($content, true, 128);
+        if (false === $json) {
+            return true;
+        }
+        // diff is over 12hrs
+        if (time() - $json['moment'] > (12 * 60 * 60)) {
+            $this->logger->debug('FirefoxCollector cache is outdated.');
+            return true;
+        }
+        $this->logger->debug('FirefoxCollector cache is fresh!');
+
+        return false;
     }
 
     /**
@@ -216,73 +240,6 @@ class FirefoxCollector implements CollectorInterface
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getCollection(): array
-    {
-        return $this->collection;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setConfiguration(array $configuration): void
-    {
-        $this->configuration = $configuration;
-        $this->cacheFile     = sprintf('%s/bookmarks-cache.json', CACHE);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setLogger(Logger $logger): void
-    {
-        $this->logger = $logger;
-        $this->logger->debug('FirefoxCollector now has a logger!');
-    }
-
-    /**
-     * @param PinBoard|null $pinBoard
-     * @return void
-     */
-    public function setPinBoard(?PinBoard $pinBoard): void
-    {
-        $this->pinBoard = $pinBoard;
-    }
-
-    /**
-     * @return PinBoard
-     */
-    public function getPinBoard(): PinBoard
-    {
-        return $this->pinBoard;
-    }
-
-    /**
-     * @return bool
-     */
-    private function cacheOutOfDate(): bool
-    {
-        if (!file_exists($this->cacheFile)) {
-            $this->logger->debug('FirefoxCollector found no cache file, so it\'s out of date.');
-            return true;
-        }
-        $content = file_get_contents($this->cacheFile);
-        $json    = json_decode($content, true, 128);
-        if (false === $json) {
-            return true;
-        }
-        // diff is over 12hrs
-        if (time() - $json['moment'] > (12 * 60 * 60)) {
-            $this->logger->debug('FirefoxCollector cache is outdated.');
-            return true;
-        }
-        $this->logger->debug('FirefoxCollector cache is fresh!');
-
-        return false;
-    }
-
-    /**
      *
      */
     private function saveToCache(): void
@@ -316,6 +273,49 @@ class FirefoxCollector implements CollectorInterface
             $this->collection[$index] = $entry;
         }
 
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getCollection(): array
+    {
+        return $this->collection;
+    }
+
+    /**
+     * @return PinBoard
+     */
+    public function getPinBoard(): PinBoard
+    {
+        return $this->pinBoard;
+    }
+
+    /**
+     * @param PinBoard|null $pinBoard
+     * @return void
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setConfiguration(array $configuration): void
+    {
+        $this->configuration = $configuration;
+        $this->cacheFile     = sprintf('%s/bookmarks-cache.json', CACHE);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setLogger(Logger $logger): void
+    {
+        $this->logger = $logger;
+        $this->logger->debug('FirefoxCollector now has a logger!');
     }
 
 }

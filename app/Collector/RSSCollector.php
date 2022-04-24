@@ -96,6 +96,22 @@ class RSSCollector implements CollectorInterface
     }
 
     /**
+     * @return PinBoard
+     */
+    public function getPinBoard(): PinBoard
+    {
+        return $this->pinBoard;
+    }
+
+    /**
+     * @param null|PinBoard $pinBoard
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
+    }
+
+    /**
      * @inheritDoc
      */
     public function setConfiguration(array $configuration): void
@@ -110,21 +126,5 @@ class RSSCollector implements CollectorInterface
     {
         $this->logger = $logger;
         $this->logger->debug('RSSCollector now has a logger!');
-    }
-
-    /**
-     * @return PinBoard
-     */
-    public function getPinBoard(): PinBoard
-    {
-        return $this->pinBoard;
-    }
-
-    /**
-     * @param null|PinBoard $pinBoard
-     */
-    public function setPinBoard(?PinBoard $pinBoard): void
-    {
-        $this->pinBoard = $pinBoard;
     }
 }

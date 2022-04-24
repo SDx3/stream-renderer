@@ -98,6 +98,21 @@ class PostFilter
     }
 
     /**
+     * @param string $host
+     * @return bool
+     */
+    private function isIgnoredHost(string $host): bool
+    {
+        // if host should be ignored, do so:
+        foreach ($this->ignoreHosts as $value) {
+            if (str_contains($host, $value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Will loop over RSS articles and make sure they're not in Wallabag or are Tweets (unlikely tho)
      * @return array
      */
@@ -126,21 +141,6 @@ class PostFilter
             }
         }
         return $result;
-    }
-
-    /**
-     * @param string $host
-     * @return bool
-     */
-    private function isIgnoredHost(string $host): bool
-    {
-        // if host should be ignored, do so:
-        foreach ($this->ignoreHosts as $value) {
-            if (str_contains($host, $value)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

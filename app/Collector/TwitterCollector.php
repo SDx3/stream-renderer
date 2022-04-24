@@ -28,7 +28,9 @@ namespace App\Collector;
 use App\Data\PinBoard;
 use Carbon\Carbon;
 use DateTimeInterface;
+use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Logger;
 
 /**
@@ -134,9 +136,10 @@ class TwitterCollector implements CollectorInterface
     }
 
     /**
-     * @return string
+     * @return void
+     * @throws GuzzleException
      */
-    private function getAccessToken(): string
+    private function getAccessToken(): void
     {
         $this->logger->debug('Need a new access token.');
         $client = new Client;
@@ -163,13 +166,13 @@ class TwitterCollector implements CollectorInterface
         file_put_contents($file, json_encode($json, JSON_PRETTY_PRINT));
         $this->configuration['access_token']  = $json['access_token'];
         $this->configuration['refresh_token'] = $json['refresh_token'];
-        return $json['access_token'];
     }
 
     /**
-     * @return bool
+     * @return never
+     * @throws Exception
      */
-    private function getNewTokens(): bool
+    private function getNewTokens(): never
     {
         $params = [
             'response_type'         => 'code',
@@ -191,6 +194,8 @@ class TwitterCollector implements CollectorInterface
     /**
      * @param string $id
      * @return array
+     * @throws GuzzleException
+     * @throws GuzzleException
      */
     private function getTweet(string $id): array
     {
@@ -264,6 +269,22 @@ class TwitterCollector implements CollectorInterface
     }
 
     /**
+     * @return PinBoard|null
+     */
+    public function getPinBoard(): ?PinBoard
+    {
+        return $this->pinBoard;
+    }
+
+    /**
+     * @param PinBoard|null $pinBoard
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
+    }
+
+    /**
      * @inheritDoc
      */
     public function setConfiguration(array $configuration): void
@@ -278,21 +299,5 @@ class TwitterCollector implements CollectorInterface
     {
         $this->logger = $logger;
         $this->logger->debug('TwitterCollector now has a logger!');
-    }
-
-    /**
-     * @return PinBoard|null
-     */
-    public function getPinBoard(): ?PinBoard
-    {
-        return $this->pinBoard;
-    }
-
-    /**
-     * @param PinBoard|null $pinBoard
-     */
-    public function setPinBoard(?PinBoard $pinBoard): void
-    {
-        $this->pinBoard = $pinBoard;
     }
 }

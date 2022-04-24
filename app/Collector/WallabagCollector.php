@@ -37,12 +37,12 @@ use Monolog\Logger;
  */
 class WallabagCollector implements CollectorInterface
 {
-    private string   $cacheFile;
-    private array    $collection;
-    private array    $configuration = [];
-    private Logger   $logger;
-    private array    $token;
+    private string    $cacheFile;
+    private array     $collection;
+    private array     $configuration = [];
+    private Logger    $logger;
     private ?PinBoard $pinBoard;
+    private array     $token;
 
     /**
      * @inheritDoc
@@ -50,7 +50,7 @@ class WallabagCollector implements CollectorInterface
     public function collect(bool $skipCache = false): void
     {
         $this->logger->debug('WallabagCollector is going to collect.');
-        $useCache        = true;
+        $useCache = true;
 
         if (true === $skipCache) {
             $useCache = false;
@@ -118,7 +118,7 @@ class WallabagCollector implements CollectorInterface
         try {
             $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            $this->logger->error('The Wallabag token is unexpectedly not JSON :( ');
+            $this->logger->error(sprintf('The Wallabag token is unexpectedly not JSON: %s', $e->getMessage()));
             exit;
         }
         $this->logger->debug(sprintf('WallabagCollector has collected access token %s.', $this->token['access_token']));
@@ -330,6 +330,22 @@ class WallabagCollector implements CollectorInterface
     }
 
     /**
+     * @return PinBoard|null
+     */
+    public function getPinBoard(): ?PinBoard
+    {
+        return $this->pinBoard;
+    }
+
+    /**
+     * @param PinBoard|null $pinBoard
+     */
+    public function setPinBoard(?PinBoard $pinBoard): void
+    {
+        $this->pinBoard = $pinBoard;
+    }
+
+    /**
      * @inheritDoc
      */
     public function setConfiguration(array $configuration): void
@@ -345,21 +361,5 @@ class WallabagCollector implements CollectorInterface
     {
         $this->logger = $logger;
         $this->logger->debug('WallabagCollector has a logger!');
-    }
-
-    /**
-     * @param PinBoard|null $pinBoard
-     */
-    public function setPinBoard(?PinBoard $pinBoard): void
-    {
-        $this->pinBoard = $pinBoard;
-    }
-
-    /**
-     * @return PinBoard|null
-     */
-    public function getPinBoard(): ?PinBoard
-    {
-        return $this->pinBoard;
     }
 }

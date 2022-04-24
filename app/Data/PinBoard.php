@@ -35,11 +35,11 @@ class PinBoard
     private array  $allowedTags = [];
     private array  $blockedTags = [];
     private Logger $logger;
-    private string $token;
-    private string $user;
     private string $tagCacheFile;
+    private string $token;
     private string $urlCacheFile;
     private array  $urls;
+    private string $user;
 
     /**
      *
@@ -51,6 +51,21 @@ class PinBoard
         $tags               = include(ROOT . '/tags.php');
         $this->allowedTags  = $tags['allowed'];
         $this->getCache();
+    }
+
+    private function getCache(): void
+    {
+        $this->blockedTags = [];
+        $this->urls        = [];
+        if (file_exists($this->tagCacheFile)) {
+            $content           = file_get_contents($this->tagCacheFile);
+            $this->blockedTags = json_decode($content, true);
+        }
+        if (file_exists($this->urlCacheFile)) {
+            $content    = file_get_contents($this->urlCacheFile);
+            $this->urls = json_decode($content, true);
+        }
+
     }
 
     /**
@@ -145,6 +160,69 @@ class PinBoard
     }
 
     /**
+     * @param string $tag
+     * @return bool
+     */
+    private function tagIsBlocked(string $tag): bool
+    {
+        $blocked = in_array($tag, $this->blockedTags, true);
+        $allowed = $this->tagIsAllowed($tag);
+        if ($blocked && !$allowed) {
+            return true;
+        }
+        if (!$blocked && !$allowed) {
+            $this->logger->info(sprintf('New!                : "%s"', $tag));
+            // add it to the blocked tags:
+            $this->blockedTags[] = trim(strtolower($tag));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $tag
+     * @return bool
+     */
+    private function tagIsAllowed(string $tag): bool
+    {
+        /**
+         * @var string $key
+         * @var array  $values
+         */
+        foreach ($this->allowedTags as $key => $values) {
+            if (!is_array($values)) {
+                die(sprintf('Tag %s does not contain array: %s' . "\n", $key, $values));
+            }
+            $values = array_map('strtolower', $values);
+            if (strtolower($key) === $tag) {
+                $this->logger->debug(sprintf('Allowed [primary]   : "%s"', $tag));
+                return true;
+            }
+            if (in_array($tag, $values, true)) {
+                $this->logger->debug(sprintf('Allowed [secondary] : "%s" (%s)', $tag, join(', ', $values)));
+                return true;
+            }
+        }
+        $this->logger->info(sprintf('BLOCKED             : "%s"', $tag));
+        return false;
+    }
+
+    private function normalizeTag(string $tag): string
+    {
+        /**
+         * @var string $key
+         * @var array  $values
+         */
+        foreach ($this->allowedTags as $key => $values) {
+            $values = array_map('strtolower', $values);
+            if (strtolower($key) === $tag || in_array($tag, $values, true)) {
+                return strtolower($key);
+            }
+        }
+        return $tag;
+    }
+
+    /**
      * @param array $allowedTags
      */
     public function XsetAllowedTags(array $allowedTags): void
@@ -197,84 +275,6 @@ class PinBoard
     public function setUser(string $user): void
     {
         $this->user = $user;
-    }
-
-    private function normalizeTag(string $tag): string
-    {
-        /**
-         * @var string $key
-         * @var array  $values
-         */
-        foreach ($this->allowedTags as $key => $values) {
-            $values = array_map('strtolower', $values);
-            if (strtolower($key) === $tag || in_array($tag, $values, true)) {
-                return strtolower($key);
-            }
-        }
-        return $tag;
-    }
-
-    /**
-     * @param string $tag
-     * @return bool
-     */
-    private function tagIsAllowed(string $tag): bool
-    {
-        /**
-         * @var string $key
-         * @var array  $values
-         */
-        foreach ($this->allowedTags as $key => $values) {
-            if (!is_array($values)) {
-                die(sprintf('Tag %s does not contain array: %s' . "\n", $key, $values));
-            }
-            $values = array_map('strtolower', $values);
-            if (strtolower($key) === $tag) {
-                $this->logger->debug(sprintf('Allowed [primary]   : "%s"', $tag));
-                return true;
-            }
-            if (in_array($tag, $values, true)) {
-                $this->logger->debug(sprintf('Allowed [secondary] : "%s" (%s)', $tag, join(', ', $values)));
-                return true;
-            }
-        }
-        $this->logger->info(sprintf('BLOCKED             : "%s"', $tag));
-        return false;
-    }
-
-    /**
-     * @param string $tag
-     * @return bool
-     */
-    private function tagIsBlocked(string $tag): bool
-    {
-        $blocked = in_array($tag, $this->blockedTags, true);
-        $allowed = $this->tagIsAllowed($tag);
-        if ($blocked && !$allowed) {
-            return true;
-        }
-        if (!$blocked && !$allowed) {
-            $this->logger->info(sprintf('New!                : "%s"', $tag));
-            // add it to the blocked tags:
-            $this->blockedTags[] = trim(strtolower($tag));
-            return true;
-        }
-        return false;
-    }
-
-    private function getCache(): void
-    {
-        $this->blockedTags = [];
-        $this->urls        = [];
-        if (file_exists($this->tagCacheFile)) {
-            $content           = file_get_contents($this->tagCacheFile);
-            $this->blockedTags = json_decode($content, true);
-        }
-        if (file_exists($this->urlCacheFile)) {
-            $content    = file_get_contents($this->urlCacheFile);
-            $this->urls = json_decode($content, true);
-        }
-
     }
 
 
