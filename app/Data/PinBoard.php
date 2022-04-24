@@ -40,16 +40,18 @@ class PinBoard
     private string $urlCacheFile;
     private array  $urls;
     private string $user;
+    private array  $localIgnoreList;
 
     /**
      *
      */
     public function __construct()
     {
-        $this->tagCacheFile = sprintf('%s/tags.json', CACHE);
-        $this->urlCacheFile = sprintf('%s/urls.json', CACHE);
-        $tags               = include(ROOT . '/tags.php');
-        $this->allowedTags  = $tags['allowed'];
+        $this->localIgnoreList = ['twitter', 'facebook'];
+        $this->tagCacheFile    = sprintf('%s/tags.json', CACHE);
+        $this->urlCacheFile    = sprintf('%s/urls.json', CACHE);
+        $tags                  = include(ROOT . '/tags.php');
+        $this->allowedTags     = $tags['allowed'];
         $this->getCache();
     }
 
@@ -128,6 +130,7 @@ class PinBoard
             $json = json_decode($body, true);
             $tags = array_merge($tags, $json[0]['popular']);
             $tags = array_merge($tags, $json[1]['recommended']);
+            $tags = $this->localFilter($tags);
             $tags = $this->filterTags($tags);
             $this->logger->debug('Sleep for .25sec...');
             usleep(250000);
@@ -290,6 +293,25 @@ class PinBoard
     public function setUser(string $user): void
     {
         $this->user = $user;
+    }
+
+    /**
+     * This method filters some tags that Pinboard people tend to give their posts
+     * that I want to ignore.
+     *
+     * @param array $tags
+     * @return array
+     */
+    private function localFilter(array $tags): array
+    {
+        $return = [];
+        foreach ($tags as $tag) {
+            $search = strtolower($tag);
+            if (!in_array($search, $this->localIgnoreList, true)) {
+                $return[] = $tag;
+            }
+        }
+        return $return;
     }
 
 
