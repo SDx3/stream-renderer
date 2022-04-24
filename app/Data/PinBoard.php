@@ -203,10 +203,14 @@ class PinBoard
                 return true;
             }
         }
-        $this->logger->info(sprintf('BLOCKED             : "%s"', $tag));
+        $this->logger->debug(sprintf('BLOCKED             : "%s"', $tag));
         return false;
     }
 
+    /**
+     * @param string $tag
+     * @return string
+     */
     private function normalizeTag(string $tag): string
     {
         /**
