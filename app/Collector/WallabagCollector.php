@@ -277,9 +277,9 @@ class WallabagCollector implements CollectorInterface
             $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
             $this->logger->debug(sprintf('Pinboard found tags: %s', join(', ', $extraTags)));
 
-            $tags = array_map('strtolower', $extraTags);
-            $tags = array_unique(array_merge($extraTags, $tags));
-            $tags = $this->pinBoard->filterTags($tags);
+            $extraTags = array_map('strtolower', $extraTags);
+            $tags      = array_unique(array_merge($extraTags, $tags));
+            $tags      = $this->pinBoard->filterTags($tags);
             sort($tags);
 
             $this->logger->debug(sprintf('Final set of tags is: %s', join(', ', $tags)));
