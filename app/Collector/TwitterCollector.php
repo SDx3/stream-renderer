@@ -48,17 +48,19 @@ class TwitterCollector implements CollectorInterface
      */
     public function collect(bool $skipCache = false): void
     {
-        $this->logger->debug('Start of collection.');
+        $this->logger->debug('Start of Twitter collection.');
 
         if ($this->hasCache()) {
+            $this->logger->debug('Twitter collection is in cache, return that instead.');
             $this->getCache();
             return;
         }
 
         if (!$this->hasToken()) {
+            $this->logger->debug('Twitter collector has no token.');
             $this->getNewTokens();
         }
-        $this->logger->debug('Have a token.');
+        $this->logger->debug('Twitter collector has a token.');
 
         $url    = sprintf('https://api.twitter.com/2/users/%s/bookmarks', $this->configuration['user_id']);
         $client = new Client;
@@ -72,11 +74,16 @@ class TwitterCollector implements CollectorInterface
         $tweets           = json_decode($res->getBody(), true);
         $this->collection = [];
         if (!array_key_exists('data', $tweets)) {
+            $this->logger->debug('Error during collection.');
             var_dump($tweets);
             exit;
         }
         $this->logger->debug(sprintf('Now collecting %d tweets...', count($tweets['data'])));
+        $total = count($tweets['data']);
+        $index = 0;
         foreach ($tweets['data'] as $tweet) {
+            $index++;
+            $this->logger->debug(sprintf('[%d/%d] Processing tweet...', $index, $total));
             $this->collection[] = $this->getTweet($tweet['id']);
         }
         $this->saveToCache();
@@ -111,7 +118,7 @@ class TwitterCollector implements CollectorInterface
         $objects          = $json['data'];
         $this->collection = [];
         foreach ($objects as $object) {
-            $object['date']     = new Carbon($object['date']);
+            $object['date']     = new Carbon($object['date'], $_ENV['TZ']);
             $this->collection[] = $object;
         }
     }
@@ -229,16 +236,16 @@ class TwitterCollector implements CollectorInterface
         $res    = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=nl&dnt=true', $url));
         $body   = (string) $res->getBody();
         $json   = json_decode($body, true);
-
-        $tags = [];
+        $tags   = [];
         if (null !== $this->pinBoard) {
-            $tags = $this->pinBoard->getTagsForUrl($url);
+            $tags = $this->pinBoard->filterTags($this->pinBoard->getTagsForUrl($url));
+            sort($tags);
+            $this->logger->debug(sprintf('Set of tags for Tweet is now: %s', join(', ', $tags)));
         }
-        sort($tags);
 
         return [
             'id'         => $tweet['data']['id'],
-            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at']),
+            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at'], $_ENV['TZ']),
             'title'      => $tweet['data']['text'],
             'author'     => $authorName,
             'categories' => $tags,

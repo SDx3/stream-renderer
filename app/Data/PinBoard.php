@@ -53,6 +53,9 @@ class PinBoard
         $this->getCache();
     }
 
+    /**
+     * @return void
+     */
     private function getCache(): void
     {
         $this->blockedTags = [];
@@ -65,15 +68,15 @@ class PinBoard
             $content    = file_get_contents($this->urlCacheFile);
             $this->urls = json_decode($content, true);
         }
-
     }
 
     /**
      * @param array $articles
      * @return array
      */
-    public function XaddTagsToList(array $articles): array
+    public function addTagsToList(array $articles): array
     {
+
         $all   = [];
         $index = 0;
         foreach ($articles as $article) {
@@ -98,7 +101,7 @@ class PinBoard
         $this->logger->debug(sprintf('Checking tags for URL %s...', $url));
         $hash = sha1($url);
         if (array_key_exists($hash, $this->urls)) {
-            $this->logger->debug(sprintf('Return from cache: %s', join(', ', $this->urls[$hash])));
+            $this->logger->debug(sprintf('Return tags from cache: %s', join(', ', $this->urls[$hash])));
             return $this->urls[$hash];
         }
 
@@ -126,8 +129,8 @@ class PinBoard
             $tags = array_merge($tags, $json[0]['popular']);
             $tags = array_merge($tags, $json[1]['recommended']);
             $tags = $this->filterTags($tags);
-            $this->logger->debug('Sleep for .5sec...');
-            usleep(500000);
+            $this->logger->debug('Sleep for .25sec...');
+            usleep(250000);
         }
         $result            = $this->filterTags($tags);
         $this->urls[$hash] = $result;
@@ -145,8 +148,9 @@ class PinBoard
      */
     public function filterTags(array $tags): array
     {
-        $tags   = array_unique($tags);
-        $tags   = array_map('strtolower', $tags);
+        $tags = array_unique($tags);
+        $tags = array_map('strtolower', $tags);
+        $this->logger->debug(sprintf('Will now filter set: %s', join(', ', $tags)));
         $return = [];
         /** @var string $tag */
         foreach ($tags as $tag) {
@@ -168,10 +172,11 @@ class PinBoard
         $blocked = in_array($tag, $this->blockedTags, true);
         $allowed = $this->tagIsAllowed($tag);
         if ($blocked && !$allowed) {
+            $this->logger->debug(sprintf(sprintf('Tag "%s" is blocked.', $tag)));
             return true;
         }
         if (!$blocked && !$allowed) {
-            $this->logger->info(sprintf('New!                : "%s"', $tag));
+            $this->logger->info(sprintf(sprintf('Tag "%s" is NEW.', $tag)));
             // add it to the blocked tags:
             $this->blockedTags[] = trim(strtolower($tag));
             return true;
@@ -195,15 +200,15 @@ class PinBoard
             }
             $values = array_map('strtolower', $values);
             if (strtolower($key) === $tag) {
-                $this->logger->debug(sprintf('Allowed [primary]   : "%s"', $tag));
+                $this->logger->debug(sprintf('Tag "%s" is allowed (primary)', $tag));
                 return true;
             }
             if (in_array($tag, $values, true)) {
-                $this->logger->debug(sprintf('Allowed [secondary] : "%s" (%s)', $tag, join(', ', $values)));
+                $this->logger->debug(sprintf('Tag "%s" is allowed (secondary) (%s)', $tag, join(', ', $values)));
                 return true;
             }
         }
-        $this->logger->debug(sprintf('BLOCKED             : "%s"', $tag));
+        $this->logger->debug(sprintf('Tag "%s" is blocked.', $tag));
         return false;
     }
 
@@ -220,9 +225,11 @@ class PinBoard
         foreach ($this->allowedTags as $key => $values) {
             $values = array_map('strtolower', $values);
             if (strtolower($key) === $tag || in_array($tag, $values, true)) {
+                $this->logger->debug(sprintf('Tag "%s" normalised to "%s".', $tag, $key));
                 return strtolower($key);
             }
         }
+        $this->logger->info(sprintf('Return original tag "%s".', $tag));
         return $tag;
     }
 
@@ -254,6 +261,7 @@ class PinBoard
 
         // same for url list:
         file_put_contents($this->urlCacheFile, json_encode($this->urls, JSON_PRETTY_PRINT));
+        $this->logger->debug('PinBoard updated the cache.');
     }
 
     /**

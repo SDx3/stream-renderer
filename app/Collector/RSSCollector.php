@@ -48,12 +48,15 @@ class RSSCollector implements CollectorInterface
         $link             = $this->configuration['feed'];
         $this->collection = [];
         $feed             = new SimplePie;
+        $index            = 0;
         $feed->set_feed_url($link);
         $feed->init();
         $feed->handle_content_type();
+        $total = count($feed->get_items());
         /** @var SimplePie_Item $item */
         foreach ($feed->get_items() as $item) {
-
+            $index++;
+            $this->logger->debug(sprintf('[%d/%d] Processing feed item.', $index, $total));
             // parse original host name
             $host = parse_url($item->get_permalink(), PHP_URL_HOST);
             if (str_starts_with($host, 'www.')) {
@@ -62,25 +65,28 @@ class RSSCollector implements CollectorInterface
 
             $current = [
                 'url'     => $item->get_permalink(),
-                'date'    => Carbon::createFromFormat('Y-m-d H:i:s', $item->get_date('Y-m-d H:i:s')),
+                'date'    => Carbon::createFromFormat('Y-m-d H:i:s', $item->get_date('Y-m-d H:i:s'), $_ENV['TZ']),
                 'title'   => $item->get_title(),
                 'host'    => $host,
                 'content' => strip_tags($item->get_description(true)),
-                'tags'    => [],
             ];
+            $tags    = [];
             /** @var SimplePie_Category $cat */
             if (null !== $item->get_categories()) {
                 foreach ($item->get_categories() as $cat) {
-                    $current['tags'][] = $cat->get_label();
+                    $tags[] = $cat->get_label();
                 }
             }
+            $this->logger->debug(sprintf('Original tags are: %s', join(', ', $tags)));
 
             // get tags from Pinboard:
             if (null !== $this->pinBoard) {
-                $current['tags'] = array_unique(array_merge($current['tags'], $this->pinBoard->getTagsForUrl($current['url'])));
+                $tags = array_unique(array_merge($tags, $this->pinBoard->getTagsForUrl($current['url'])));
+                $tags = $this->pinBoard->filterTags($tags);
+                $this->logger->debug(sprintf('With PinBoard tags are: %s', join(', ', $tags)));
             }
-            sort($current['tags']);
-
+            sort($tags);
+            $current['tags'] = $tags;
 
             $this->collection[] = $current;
         }

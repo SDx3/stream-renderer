@@ -49,9 +49,11 @@ class FirefoxCollector implements CollectorInterface
         $useCache = true;
 
         if (true === $skipCache) {
+            $this->logger->debug('FirefoxCollector must skip cache.');
             $useCache = false;
         }
         if (false === $skipCache && $this->cacheOutOfDate()) {
+            $this->logger->debug('FirefoxCollector will skip cache (which is out of date).');
             $useCache = false;
         }
 
@@ -78,6 +80,7 @@ class FirefoxCollector implements CollectorInterface
         $content = file_get_contents($this->cacheFile);
         $json    = json_decode($content, true, 128);
         if (false === $json) {
+            $this->logger->debug('FirefoxCollector cache is outdated.');
             return true;
         }
         // diff is over 12hrs
@@ -96,6 +99,7 @@ class FirefoxCollector implements CollectorInterface
      */
     private function collectBookmarks(): void
     {
+        $this->logger->debug('Now collecting bookmarks.');
         $this->collection = [];
         $file             = sprintf('%s/%s', ROOT, 'bookmarks.json');
         $body             = file_get_contents($file);
@@ -104,24 +108,30 @@ class FirefoxCollector implements CollectorInterface
         $sorted           = $this->processChildren('(root)', $json, $sorted);
         $total            = count($sorted);
         $index            = 0;
+
+        $this->logger->debug('Now looping over bookmarks.');
         foreach ($sorted as $bookmark) {
+            $index++;
+            $this->logger->debug(sprintf('[%d/%d] Processing bookmark.', $index, $total));
+
             // if not a bookmark, continue:
             if ('text/x-moz-place' !== $bookmark['type']) {
+                $this->logger->debug('Skip non-bookmark');
                 continue;
             }
             if (str_starts_with($bookmark['uri'], 'place:')) {
+                $this->logger->debug('Skip "place:"-bookmark');
                 continue;
             }
             if (str_starts_with($bookmark['uri'], 'javascript:')) {
+                $this->logger->debug('Skip "javascript:"-bookmark');
                 continue;
-            }
-
-            // if already in collection, continue (duplicate bookmark):
+            }            // if already in collection, continue (duplicate bookmark):
             $hash = sha1($bookmark['uri']);
             if (in_array($hash, $this->collection)) {
+                $this->logger->debug(sprintf('Already collected "%s", duplicate bookmark.', $bookmark['uri']));
                 continue;
             }
-            $this->logger->debug(sprintf('[%d/%d] Processing bookmark.', ($index + 1), $total));
             $host = parse_url($bookmark['uri'], PHP_URL_HOST);
 
             // special thing for youtube:
@@ -131,6 +141,7 @@ class FirefoxCollector implements CollectorInterface
             }
             if (str_contains($host, 'youtube.com')) {
                 $isYoutube = true;
+                $this->logger->debug('Bookmark is YouTube!');
             }
 
             $html = '';
@@ -151,19 +162,22 @@ class FirefoxCollector implements CollectorInterface
                 $search  = 'width="200" height="113"';
                 $replace = 'width="600" height="339"';
                 $html    = str_replace($search, $replace, $html);
-
+                $this->logger->debug('Collected YouTube HTML');
             }
 
             // get parent(s) as tags:
             $tags = $bookmark['tags'];
             $tags = $this->getTags($sorted, $bookmark['parent'], $tags);
-
+            $this->logger->debug(sprintf('Original tags are: %s', join(', ', $tags)));
             // add tags from pinboard:
             if (null !== $this->pinBoard) {
                 $tags = array_unique(array_merge($tags, $this->pinBoard->getTagsForUrl($bookmark['uri'])));
+                $tags = $this->pinBoard->filterTags($tags);
+                $this->logger->debug(sprintf('Pinboard+original tags are: %s', join(', ', $tags)));
             }
-            sort($tags);
 
+            sort($tags);
+            $this->logger->debug(sprintf('Final tags are: %s', join(', ', $tags)));
             // TODO filter on tags.
 
             $this->collection[$hash] = [
@@ -175,7 +189,6 @@ class FirefoxCollector implements CollectorInterface
                 'is_youtube' => $isYoutube,
                 'html'       => $html,
             ];
-            $index++;
         }
         $this->logger->debug(sprintf('FirefoxCollector collected %d bookmark(s)', count($this->collection)));
     }
@@ -188,6 +201,7 @@ class FirefoxCollector implements CollectorInterface
      */
     private function processChildren(string $parentId, array $set, array $sorted): array
     {
+        $this->logger->debug(sprintf('Now in processChildren("%s")', $parentId));
         $guid   = $set['guid'] ?? '(empty)';
         $object = [
             'id'     => $guid,
@@ -196,7 +210,7 @@ class FirefoxCollector implements CollectorInterface
             'uri'    => $set['uri'] ?? null,
             'type'   => $set['type'],
             'tags'   => [],
-            'date'   => Carbon::createFromFormat('U', bcdiv($set['dateAdded'], '1000000')),
+            'date'   => Carbon::createFromFormat('U', bcdiv($set['dateAdded'], '1000000'), $_ENV['TZ']),
         ];
         if (array_key_exists('tags', $set)) {
             $object['tags'] = explode(',', $set['tags']);
@@ -221,6 +235,7 @@ class FirefoxCollector implements CollectorInterface
      */
     private function getTags(array $sorted, string $id, array $tags): array
     {
+        $this->logger->debug(sprintf('Now in processChildren("%s")', $id));
         // first find the ID and add it to tags:
         foreach ($sorted as $key => $entry) {
             if ($key === $id) {
@@ -266,7 +281,7 @@ class FirefoxCollector implements CollectorInterface
         $this->collection = $json['data'];
         $this->logger->debug('FirefoxCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
-            $entry['date'] = new Carbon($entry['date']);
+            $entry['date'] = new Carbon($entry['date'], $_ENV['TZ']);
             if (null !== $this->pinBoard) {
                 $entry['categories'] = $this->pinBoard->filterTags($entry['categories']);
             }

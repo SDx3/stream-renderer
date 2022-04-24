@@ -53,9 +53,11 @@ class WallabagCollector implements CollectorInterface
         $useCache = true;
 
         if (true === $skipCache) {
+            $this->logger->debug('WallabagCollector will skip the cache.');
             $useCache = false;
         }
         if (false === $skipCache && $this->cacheOutOfDate()) {
+            $this->logger->debug('WallabagCollector cache is out of date.');
             $useCache = false;
         }
 
@@ -245,34 +247,43 @@ class WallabagCollector implements CollectorInterface
      */
     private function processArticle(array $item): array
     {
+        $this->logger->debug(sprintf('Now processing article %s', $item['url']));
+
         // parse original host name
         $host = parse_url($item['url'], PHP_URL_HOST);
         if (str_starts_with($host, 'www.')) {
             $host = substr($host, 4);
         }
+        $tags    = [];
         $article = [
             'type'         => 'wallabag',
             'title'        => $item['title'],
             'url'          => $item['url'],
             'host'         => $host,
             'reading_time' => $item['reading_time'],
-            'date'         => new Carbon($item['created_at']), // mag ook "archived at" maar liever deze.
+            'date'         => new Carbon($item['created_at'], $_ENV['TZ']), // mag ook "archived at" maar liever deze.
             'wallabag_url' => sprintf('%s/share/%s', $this->configuration['host'], $item['uid']),
-            'tags'         => [],
             'annotations'  => [],
         ];
 
         /** @var array $tag */
         foreach ($item['tags'] as $tag) {
-            $article['tags'][] = $tag['label'];
+            $tags[] = $tag['label'];
         }
+        $this->logger->debug(sprintf('Original tag-set is: %s', join(', ', $tags)));
 
         // if pinboard, expand list of tags with what we found online:
         if (null !== $this->pinBoard) {
             $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
-            $tags      = array_map('strtolower', $extraTags);
-            $tags      = array_unique(array_merge($article['tags'], $tags));
+            $this->logger->debug(sprintf('Pinboard found tags: %s', join(', ', $extraTags)));
+
+            $tags = array_map('strtolower', $extraTags);
+            $tags = array_unique(array_merge($article['tags'], $tags));
+            $tags = $this->pinBoard->filterTags($tags);
             sort($tags);
+
+            $this->logger->debug(sprintf('Final set of tags is: %s', join(', ', $tags)));
+
             $article['tags'] = $tags;
         }
 
@@ -314,11 +325,11 @@ class WallabagCollector implements CollectorInterface
         $this->collection = $json['data'];
         $this->logger->debug('WallabagCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
-            $entry['date']            = new Carbon($entry['date']);
+            $this->logger->debug(sprintf('Now processing %s', $entry['url']));
+            $entry['date']            = new Carbon($entry['date'], $_ENV['TZ']);
             $entry['tags']            = $this->pinBoard->filterTags($entry['tags']);
             $this->collection[$index] = $entry;
         }
-
     }
 
     /**
