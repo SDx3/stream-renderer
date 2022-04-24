@@ -47,7 +47,7 @@ class PinBoard
      */
     public function __construct()
     {
-        $this->localIgnoreList = ['twitter', 'facebook'];
+        $this->localIgnoreList = ['twitter', 'twitterlink', 'facebook'];
         $this->tagCacheFile    = sprintf('%s/tags.json', CACHE);
         $this->urlCacheFile    = sprintf('%s/urls.json', CACHE);
         $tags                  = include(ROOT . '/tags.php');
