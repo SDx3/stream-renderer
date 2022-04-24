@@ -15,7 +15,7 @@ return [
         'algorithms'             => ['algorithm'],
         'architecture'           => ['architektura'],
         'apps'                   => ['app'],
-        'ai'                     => ['artificialintelligence', 'ml', 'artificial-intelligence'],
+        'ai'                     => ['artificialintelligence', 'artificial-intelligence'],
         'activisme'              => [],
         'aivd'                   => [],
         'abuse'                  => [],
@@ -210,7 +210,7 @@ return [
         'linux'                  => [],
 
         // M
-        'machine-learning'       => ['machine_learning', 'machinelearning'],
+        'machine-learning'       => ['machine_learning', 'machinelearning', 'ml'],
         'mathematics'            => ['math', 'maths'],
         'media'                  => [],
         'metoo'                  => [],
