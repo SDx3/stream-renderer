@@ -150,7 +150,7 @@ class WallabagCollector implements CollectorInterface
             } catch (ClientException $e) {
                 $this->logger->error(sprintf('Page "%s" resulted in a %d-code. Continue.', $url, $e->getResponse()->getStatusCode()));
                 $hasMore = false;
-                $page++;
+                //$page++;
                 continue;
             }
             $body = (string) $response->getBody();
@@ -159,7 +159,7 @@ class WallabagCollector implements CollectorInterface
             } catch (JsonException $e) {
                 $this->logger->error(sprintf('Page "%s" resulted in a JSON error ("%s"). Continue.', $url, $e->getMessage()));
                 $hasMore = false;
-                $page++;
+                //$page++;
                 continue;
             }
 
@@ -185,7 +185,7 @@ class WallabagCollector implements CollectorInterface
                 $this->logger->debug(sprintf('WallabagCollector made article #%d public.', $item['id']));
                 sleep(2);
             }
-            $page++;
+            //$page++;
         }
         $this->logger->debug('WallabagCollector is done making articles public.');
     }
