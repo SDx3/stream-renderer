@@ -172,6 +172,7 @@ return [
         'google'                 => [],
         'government'             => ['overheid'],
         'geopolitics'            => [],
+        'germany'                => [],
 
         // H
 
@@ -295,6 +296,7 @@ return [
         'supply-chain-security'    => ['supply-chain', 'supply chain security'],
         'surveillance'             => [],
         'sustainability'           => [],
+        'switzerland'              => [],
 
 
         // T
@@ -305,7 +307,7 @@ return [
         'terrorism'                => ['terrorist'],
         'thought'                  => [],
         'threat-modeling'          => ['threat-modelling'],
-        'time-management'          => ['time', 'time-tracking', 'time-confetti'],
+        'time-management'          => ['time', 'time-tracking', 'time-confetti', 'prioritization'],
         'tls'                      => [],
         'tools'                    => ['tool'],
         'tor'                      => [],
