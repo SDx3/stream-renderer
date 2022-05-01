@@ -68,7 +68,7 @@ return [
         'business'               => ['business-technology', 'corporate', 'corporateincompetence'],
 
         // C
-        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation'],
+        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation','rsa'],
         'capitalism'             => [],
         'carriere'               => ['career'],
         'centralised'            => ['centralization'],
@@ -258,7 +258,7 @@ return [
         'programming'              => [],
 
         // Q
-        'quantum-cryptography'     => ['quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum'],
+        'quantum-cryptography'     => ['quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum','quantumcomputing'],
         'quantum-key-distribution' => ['qkd'],
 
         // R
