@@ -68,7 +68,7 @@ return [
         'business'               => ['business-technology', 'corporate', 'corporateincompetence'],
 
         // C
-        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation','rsa'],
+        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa'],
         'capitalism'             => [],
         'carriere'               => ['career'],
         'centralised'            => ['centralization'],
@@ -107,6 +107,8 @@ return [
         'cybercrime'             => [],
         'cybersecurity'          => [],
         'cyberwar'               => ['digitalwarfare'],
+        'censure'                => [],
+        'communities'            => [],
 
         // D
         'data-mining'            => [],
@@ -128,6 +130,7 @@ return [
         'docker'                 => [],
         'dutch'                  => [],
         'dystopia'               => [],
+        'dkim'                   => [],
 
         // E
         'employment'             => ['job', 'jobs', 'work', 'antiwork'],
@@ -258,7 +261,7 @@ return [
         'programming'              => [],
 
         // Q
-        'quantum-cryptography'     => ['quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum','quantumcomputing'],
+        'quantum-cryptography'     => ['quantum', 'post-quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum', 'quantumcomputing'],
         'quantum-key-distribution' => ['qkd'],
 
         // R
@@ -297,6 +300,7 @@ return [
         'surveillance'             => [],
         'sustainability'           => [],
         'switzerland'              => [],
+        'signatures'               => [],
 
 
         // T
