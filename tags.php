@@ -109,6 +109,7 @@ return [
         'cyberwar'               => ['digitalwarfare'],
         'censure'                => [],
         'communities'            => [],
+        'conference'             => ['rwc'],
 
         // D
         'data-mining'            => [],
@@ -248,6 +249,7 @@ return [
         'productivity'           => [],
         'politics'               => ['#politics', 'politiek'],
         'pki'                    => ['certificates', 'key-management', 'key-transparency', 'krypto_key_revocation', 'krypto_pki_ca', 'krypto_tls_cert'],
+        'parenting'              => ['motherhood'],
 
         'palintir'                 => [],
         'patriarchy'               => [],
@@ -280,7 +282,7 @@ return [
         'sci-fi'                   => ['scifi'],
         'security'                 => [],
         'self-hosted'              => ['selfhost'],
-        'self-improvement'         => ['personal-improvement', 'self_help', 'selfhelp', 'personal-development', 'professional_development',],
+        'self-improvement'         => ['personal-improvement', 'self_help', 'selfhelp', 'personal-development', 'professional_development', 'personal development'],
         'sexism'                   => [],
         'signal'                   => [],
         'smart'                    => [],
@@ -318,6 +320,7 @@ return [
         'trump'                    => [],
         'tumblr'                   => [],
         'tutorial'                 => [],
+        'tv'                       => [],
 
         // U
         'usa'                      => ['america', 'united states'],
