@@ -70,6 +70,12 @@ class RSSCollector implements CollectorInterface
                 'host'    => $host,
                 'content' => strip_tags($item->get_description(true)),
             ];
+            
+            // items collected from RSS may have html-escaped characters in their titles. They should be replaced:
+            $search           = ['&#039;'];
+            $replace          = ["'"];
+            $current['title'] = str_replace($search, $replace, $current['title']);
+            
             $tags    = [];
             /** @var SimplePie_Category $cat */
             if (null !== $item->get_categories()) {
