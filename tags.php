@@ -66,6 +66,8 @@ return [
         'bodybuilding'           => [],
         'burnout'                => [],
         'business'               => ['business-technology', 'corporate', 'corporateincompetence'],
+        'biology'                => [],
+        'birds'                  => [],
 
         // C
         'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa'],
@@ -261,6 +263,7 @@ return [
         'politie'                  => ['police'],
         'privacy'                  => [],
         'programming'              => [],
+        'physics'                  => [],
 
         // Q
         'quantum-cryptography'     => ['quantum', 'post-quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum', 'quantumcomputing'],
