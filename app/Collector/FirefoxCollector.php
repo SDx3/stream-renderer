@@ -178,7 +178,11 @@ class FirefoxCollector implements CollectorInterface
 
             sort($tags);
             $this->logger->debug(sprintf('Final tags are: %s', join(', ', $tags)));
-            // TODO filter on tags.
+
+            if(in_array('private', $tags, true)) {
+                $this->logger->info(sprintf('URL %s is private, skip it.', $bookmark['uri']));
+                continue;
+            }
 
             $this->collection[$hash] = [
                 'categories' => $tags,

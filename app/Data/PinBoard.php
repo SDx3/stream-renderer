@@ -181,7 +181,6 @@ class PinBoard
         $blocked = in_array($tag, $this->blockedTags, true);
         $allowed = $this->tagIsAllowed($tag);
         if ($blocked && !$allowed) {
-            $this->logger->debug(sprintf(sprintf('Tag "%s" is blocked.', $tag)));
             return true;
         }
         if (!$blocked && !$allowed) {
