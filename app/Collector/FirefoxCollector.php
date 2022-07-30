@@ -303,9 +303,9 @@ class FirefoxCollector implements CollectorInterface
     }
 
     /**
-     * @return PinBoard
+     * @return PinBoard|null
      */
-    public function getPinBoard(): PinBoard
+    public function getPinBoard(): ?PinBoard
     {
         return $this->pinBoard;
     }
