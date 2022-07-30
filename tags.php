@@ -264,6 +264,7 @@ return [
         'privacy'                  => [],
         'programming'              => [],
         'physics'                  => [],
+        'private'                  => [],
 
         // Q
         'quantum-cryptography'     => ['quantum', 'post-quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum', 'quantumcomputing'],
