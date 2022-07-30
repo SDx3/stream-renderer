@@ -58,7 +58,7 @@ class PostFilter
                 $this->logger->debug(sprintf('Bookmark collection will skip over "%s" because it\'s in Wallabag.', $item['url']));
                 $include = false;
             }
-            if ($this->isIgnoredHost($item['host'])) {
+            if ($this->isIgnoredHost((string) $item['host'])) {
                 $this->logger->debug(sprintf('Bookmark collection will skip over "%s" because it\'s an excluded host.', $item['url']));
                 $include = false;
             }

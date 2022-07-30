@@ -172,7 +172,7 @@ class FirefoxCollector implements CollectorInterface
             // add tags from pinboard:
             if (null !== $this->pinBoard) {
                 $tags = array_unique(array_merge($tags, $this->pinBoard->getTagsForUrl($bookmark['uri'])));
-                $tags = $this->pinBoard->filterTags($tags);
+                $tags = $this->pinBoard->filterTags($tags, $bookmark['uri']);
                 $this->logger->debug(sprintf('Pinboard+original tags are: %s', join(', ', $tags)));
             }
 
@@ -283,7 +283,7 @@ class FirefoxCollector implements CollectorInterface
         foreach ($this->collection as $index => $entry) {
             $entry['date'] = new Carbon($entry['date'], $_ENV['TZ']);
             if (null !== $this->pinBoard) {
-                $entry['categories'] = $this->pinBoard->filterTags($entry['categories']);
+                $entry['categories'] = $this->pinBoard->filterTags($entry['categories'], $entry['url']);
             }
             $this->collection[$index] = $entry;
         }

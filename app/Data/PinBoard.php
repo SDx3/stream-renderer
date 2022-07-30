@@ -131,11 +131,11 @@ class PinBoard
             $tags = array_merge($tags, $json[0]['popular']);
             $tags = array_merge($tags, $json[1]['recommended']);
             $tags = $this->localFilter($tags);
-            $tags = $this->filterTags($tags);
+            $tags = $this->filterTags($tags, $url);
             $this->logger->debug('Sleep for .25sec...');
             usleep(250000);
         }
-        $result            = $this->filterTags($tags);
+        $result            = $this->filterTags($tags, $url);
         $this->urls[$hash] = $result;
         return $result;
 
@@ -149,15 +149,18 @@ class PinBoard
      * @param array $tags
      * @return array
      */
-    public function filterTags(array $tags): array
+    public function filterTags(array $tags, string $url): array
     {
         if (0 === count($tags)) {
             return [];
         }
         $tags = array_unique($tags);
         $tags = array_map('strtolower', $tags);
+        $this->logger->debug(sprintf('Filtering for URL %s', $url));
         $this->logger->debug(sprintf('Will now filter set: %s', join(', ', $tags)));
         $return = [];
+
+
         /** @var string $tag */
         foreach ($tags as $tag) {
             $blocked = $this->tagIsBlocked($tag);

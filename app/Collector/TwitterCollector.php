@@ -238,7 +238,7 @@ class TwitterCollector implements CollectorInterface
         $json   = json_decode($body, true);
         $tags   = [];
         if (null !== $this->pinBoard) {
-            $tags = $this->pinBoard->filterTags($this->pinBoard->getTagsForUrl($url));
+            $tags = $this->pinBoard->filterTags($this->pinBoard->getTagsForUrl($url), $url);
             sort($tags);
             $this->logger->debug(sprintf('Set of tags for Tweet is now: %s', join(', ', $tags)));
         }

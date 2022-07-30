@@ -279,7 +279,7 @@ class WallabagCollector implements CollectorInterface
 
             $extraTags = array_map('strtolower', $extraTags);
             $tags      = array_unique(array_merge($extraTags, $tags));
-            $tags      = $this->pinBoard->filterTags($tags);
+            $tags      = $this->pinBoard->filterTags($tags, $item['url']);
             sort($tags);
 
             $this->logger->debug(sprintf('Final set of tags is: %s', join(', ', $tags)));
@@ -327,7 +327,7 @@ class WallabagCollector implements CollectorInterface
         foreach ($this->collection as $index => $entry) {
             $this->logger->debug(sprintf('Now processing %s', $entry['url']));
             $entry['date']            = new Carbon($entry['date'], $_ENV['TZ']);
-            $entry['tags']            = $this->pinBoard->filterTags($entry['tags']);
+            $entry['tags']            = $this->pinBoard->filterTags($entry['tags'], $entry['url']);
             $this->collection[$index] = $entry;
         }
     }

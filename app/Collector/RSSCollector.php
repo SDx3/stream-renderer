@@ -70,12 +70,12 @@ class RSSCollector implements CollectorInterface
                 'host'    => $host,
                 'content' => strip_tags($item->get_description(true)),
             ];
-            
+
             // items collected from RSS may have html-escaped characters in their titles. They should be replaced:
             $search           = ['&#039;'];
             $replace          = ["'"];
             $current['title'] = str_replace($search, $replace, $current['title']);
-            
+
             $tags    = [];
             /** @var SimplePie_Category $cat */
             if (null !== $item->get_categories()) {
@@ -88,7 +88,7 @@ class RSSCollector implements CollectorInterface
             // get tags from Pinboard:
             if (null !== $this->pinBoard) {
                 $tags = array_unique(array_merge($tags, $this->pinBoard->getTagsForUrl($current['url'])));
-                $tags = $this->pinBoard->filterTags($tags);
+                $tags = $this->pinBoard->filterTags($tags, $current['url']);
                 $this->logger->debug(sprintf('With PinBoard tags are: %s', join(', ', $tags)));
             }
             sort($tags);
