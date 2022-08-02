@@ -180,7 +180,7 @@ class FirefoxCollector implements CollectorInterface
             $this->logger->debug(sprintf('Final tags are: %s', join(', ', $tags)));
 
             if(in_array('private', $tags, true)) {
-                $this->logger->info(sprintf('URL %s is private, skip it.', $bookmark['uri']));
+                $this->logger->debug(sprintf('URL %s is private, skip it.', $bookmark['uri']));
                 continue;
             }
 
