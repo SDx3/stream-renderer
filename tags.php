@@ -45,6 +45,7 @@ return [
         'awareness'              => [],
         'aws'                    => [],
         'azure'                  => [],
+        'agility'                => [],
 
         // B
         'backdoor'               => ['backdoors'],
