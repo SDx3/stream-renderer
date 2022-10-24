@@ -155,7 +155,7 @@ class FirefoxCollector implements CollectorInterface
                 ];
                 $url    = sprintf('https://www.youtube.com/oembed?%s', http_build_query($params));
                 $client = new Client;
-                $body   = ['html' => ''];
+                $body   = '{"html": ""}';
                 try {
                     $res = $client->get($url);
                 } catch (ClientException $e) {
