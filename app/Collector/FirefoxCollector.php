@@ -28,6 +28,7 @@ namespace App\Collector;
 use App\Data\PinBoard;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Logger;
 
@@ -108,6 +109,7 @@ class FirefoxCollector implements CollectorInterface
         $sorted           = $this->processChildren('(root)', $json, $sorted);
         $total            = count($sorted);
         $index            = 0;
+        $include          = true; // can be set to false by the YouTube collector.
 
         $this->logger->debug('Now looping over bookmarks.');
         foreach ($sorted as $bookmark) {
@@ -134,7 +136,7 @@ class FirefoxCollector implements CollectorInterface
             }
             $host = parse_url($bookmark['uri'], PHP_URL_HOST);
 
-            // special thing for youtube:
+            // special thing for YouTube:
             $isYoutube = false;
             if (str_starts_with($host, 'www.')) {
                 $host = substr($host, 4);
@@ -146,17 +148,23 @@ class FirefoxCollector implements CollectorInterface
 
             $html = '';
             if (true === $isYoutube) {
-                // get oEmbed for youtube movie:
+                // get oEmbed for YouTube movie:
                 $params = [
                     'url'    => $bookmark['uri'],
                     'format' => 'json',
                 ];
                 $url    = sprintf('https://www.youtube.com/oembed?%s', http_build_query($params));
                 $client = new Client;
-                $res    = $client->get($url);
-                $body   = (string) $res->getBody();
-                $json   = json_decode($body, true);
-                $html   = $json['html'];
+                $body   = ['html' => ''];
+                try {
+                    $res = $client->get($url);
+                } catch (ClientException $e) {
+                    $this->logger->debug(sprintf('Could not get oEmbed for YouTube movie "%s".', $bookmark['uri']));
+                    $include = false;
+                    $body    = (string) $res->getBody();
+                }
+                $json = json_decode($body, true);
+                $html = $json['html'];
 
                 // this is a very cheap but effective way to resize the video:
                 $search  = 'width="200" height="113"';
@@ -179,20 +187,21 @@ class FirefoxCollector implements CollectorInterface
             sort($tags);
             $this->logger->debug(sprintf('Final tags are: %s', join(', ', $tags)));
 
-            if(in_array('private', $tags, true)) {
+            if (in_array('private', $tags, true)) {
                 $this->logger->debug(sprintf('URL %s is private, skip it.', $bookmark['uri']));
                 continue;
             }
-
-            $this->collection[$hash] = [
-                'categories' => $tags,
-                'title'      => $bookmark['title'],
-                'url'        => $bookmark['uri'],
-                'date'       => $bookmark['date'],
-                'host'       => $host,
-                'is_youtube' => $isYoutube,
-                'html'       => $html,
-            ];
+            if (true === $include) {
+                $this->collection[$hash] = [
+                    'categories' => $tags,
+                    'title'      => $bookmark['title'],
+                    'url'        => $bookmark['uri'],
+                    'date'       => $bookmark['date'],
+                    'host'       => $host,
+                    'is_youtube' => $isYoutube,
+                    'html'       => $html,
+                ];
+            }
         }
         $this->logger->debug(sprintf('FirefoxCollector collected %d bookmark(s)', count($this->collection)));
     }
