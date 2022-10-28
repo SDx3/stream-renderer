@@ -63,5 +63,9 @@ if (array_key_exists('code', $_GET)) {
     file_put_contents($file, json_encode($json, JSON_PRETTY_PRINT));
 
     echo 'The refresh token is saved in the cache file!';
+    echo '<br>';
+    echo 'If necessary, put this file in <code>cache/twitter.json</code>:';
+    echo '<br><br>';
+    echo '<code>' . json_encode($json, JSON_PRETTY_PRINT) . '</code>';
     exit;
 }

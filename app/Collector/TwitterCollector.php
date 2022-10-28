@@ -194,6 +194,7 @@ class TwitterCollector implements CollectorInterface
         echo "Since you have no refresh token, please visit this URL:\n";
         echo $url;
         echo "\n";
+        echo "\n";
         echo "Then take the refresh token from the vagrant VM page you'll be redirected to.\n";
         echo "\n";
 
