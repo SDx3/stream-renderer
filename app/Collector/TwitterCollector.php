@@ -184,7 +184,7 @@ class TwitterCollector implements CollectorInterface
         $params = [
             'response_type'         => 'code',
             'client_id'             => $this->configuration['client_id'],
-            'redirect_uri'          => 'http://10.0.0.15/projects/sanderdorigo.nl-renderer/callback.php',
+            'redirect_uri'          => $_ENV['TWITTER_REDIRECT_URL'],
             'scope'                 => 'tweet.read users.read bookmark.read offline.access',
             'state'                 => (string) random_int(1, 1000),
             'code_challenge'        => 'challenge',
@@ -193,6 +193,8 @@ class TwitterCollector implements CollectorInterface
         $url    = 'https://twitter.com/i/oauth2/authorize?' . http_build_query($params);
         echo "Since you have no refresh token, please visit this URL:\n";
         echo $url;
+        echo "\n";
+        echo "Then take the refresh token from the vagrant VM page you'll be redirected to.\n";
         echo "\n";
 
         exit;
