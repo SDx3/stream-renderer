@@ -180,6 +180,7 @@ return [
         'government'             => ['overheid'],
         'geopolitics'            => [],
         'germany'                => [],
+        'gaming'                 => [],
 
         // H
 
