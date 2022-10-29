@@ -71,7 +71,7 @@ return [
         'birds'                  => [],
 
         // C
-        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa'],
+        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa', 'hashing'],
         'capitalism'             => [],
         'carriere'               => ['career'],
         'centralised'            => ['centralization'],
@@ -113,6 +113,7 @@ return [
         'censure'                => [],
         'communities'            => [],
         'conference'             => ['rwc'],
+        'cinema'                 => ['film', 'movies'],
 
         // D
         'data-mining'            => [],
@@ -239,6 +240,7 @@ return [
         'nist'                   => ['nist800', 'nist800-70'],
         'note-taking'            => ['notetaking'],
         'nsa'                    => [],
+        'networking'             => [],
 
 
         // O
@@ -254,6 +256,7 @@ return [
         'politics'               => ['#politics', 'politiek'],
         'pki'                    => ['certificates', 'key-management', 'key-transparency', 'krypto_key_revocation', 'krypto_pki_ca', 'krypto_tls_cert'],
         'parenting'              => ['motherhood'],
+        'psychology'             => [],
 
         'palintir'                 => [],
         'patriarchy'               => [],
@@ -309,6 +312,8 @@ return [
         'sustainability'           => [],
         'switzerland'              => [],
         'signatures'               => [],
+        'software'                 => [],
+        'sociology'                => [],
 
 
         // T
