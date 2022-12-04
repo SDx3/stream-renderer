@@ -78,7 +78,9 @@ class PostFilter
     {
         $filtered = [];
         foreach ($this->tweets as $tweet) {
-            $filtered[] = $tweet['url'];
+            if (0 !== count($tweet)) {
+                $filtered[] = $tweet['url'];
+            }
         }
         return $filtered;
     }
