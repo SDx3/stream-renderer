@@ -58,7 +58,7 @@ class PostFilter
                 $this->logger->debug(sprintf('Bookmark collection will skip over "%s" because it\'s in Wallabag.', $item['url']));
                 $include = false;
             }
-            if ($this->isIgnoredHost((string) $item['host'])) {
+            if ($this->isIgnoredHost((string)$item['host'])) {
                 $this->logger->debug(sprintf('Bookmark collection will skip over "%s" because it\'s an excluded host.', $item['url']));
                 $include = false;
             }
@@ -98,7 +98,7 @@ class PostFilter
     }
 
     /**
-     * @param string $host
+     * @param  string  $host
      * @return bool
      */
     private function isIgnoredHost(string $host): bool
@@ -150,7 +150,15 @@ class PostFilter
      */
     public function getFilteredTweets(): array
     {
-        return $this->tweets;
+        $result = [];
+        /** @var array $tweet */
+        foreach ($this->tweets as $tweet) {
+            if (0 === count($tweet)) {
+                continue;
+            }
+            $result[] = $tweet;
+        }
+        return $result;
     }
 
     /**
@@ -187,7 +195,7 @@ class PostFilter
     }
 
     /**
-     * @param array $bookmarks
+     * @param  array  $bookmarks
      */
     public function setBookmarks(array $bookmarks): void
     {
@@ -195,7 +203,7 @@ class PostFilter
     }
 
     /**
-     * @param array $ignoreHosts
+     * @param  array  $ignoreHosts
      */
     public function setIgnoreHosts(array $ignoreHosts): void
     {
@@ -203,7 +211,7 @@ class PostFilter
     }
 
     /**
-     * @param Logger $logger
+     * @param  Logger  $logger
      */
     public function setLogger(Logger $logger): void
     {
@@ -212,7 +220,7 @@ class PostFilter
     }
 
     /**
-     * @param array $rss
+     * @param  array  $rss
      */
     public function setRss(array $rss): void
     {
@@ -220,7 +228,7 @@ class PostFilter
     }
 
     /**
-     * @param array $tweets
+     * @param  array  $tweets
      */
     public function setTweets(array $tweets): void
     {
@@ -228,7 +236,7 @@ class PostFilter
     }
 
     /**
-     * @param array $wallabag
+     * @param  array  $wallabag
      */
     public function setWallabag(array $wallabag): void
     {

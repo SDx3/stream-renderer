@@ -30,6 +30,7 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Logger;
 
@@ -162,7 +163,7 @@ class TwitterCollector implements CollectorInterface
         ];
 
         $res  = $client->request('POST', 'https://api.twitter.com/2/oauth2/token', $opts);
-        $body = (string) $res->getBody();
+        $body = (string)$res->getBody();
         $json = json_decode($body, true);
 
         // add time:
@@ -186,11 +187,11 @@ class TwitterCollector implements CollectorInterface
             'client_id'             => $this->configuration['client_id'],
             'redirect_uri'          => $_ENV['TWITTER_REDIRECT_URL'],
             'scope'                 => 'tweet.read users.read bookmark.read offline.access',
-            'state'                 => (string) random_int(1, 1000),
+            'state'                 => (string)random_int(1, 1000),
             'code_challenge'        => 'challenge',
             'code_challenge_method' => 'plain',
         ];
-        $url    = 'https://twitter.com/i/oauth2/authorize?' . http_build_query($params);
+        $url    = 'https://twitter.com/i/oauth2/authorize?'.http_build_query($params);
         echo "Since you have no refresh token, please visit this URL:\n";
         echo $url;
         echo "\n";
@@ -202,7 +203,7 @@ class TwitterCollector implements CollectorInterface
     }
 
     /**
-     * @param string $id
+     * @param  string  $id
      * @return array
      * @throws GuzzleException
      * @throws GuzzleException
@@ -236,10 +237,16 @@ class TwitterCollector implements CollectorInterface
         }
         $url    = sprintf('https://twitter.com/%s/status/%s', $authorName, $tweet['data']['id']);
         $client = new Client;
-        $res    = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=nl&dnt=true', $url));
-        $body   = (string) $res->getBody();
-        $json   = json_decode($body, true);
-        $tags   = [];
+        try {
+            $res = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=nl&dnt=true', $url));
+        } catch (ClientException $e) {
+            $this->logger->error(sprintf('Could not get oembed for tweet #%s', $id));
+            return [];
+        }
+
+        $body = (string)$res->getBody();
+        $json = json_decode($body, true);
+        $tags = [];
         if (null !== $this->pinBoard) {
             $tags = $this->pinBoard->filterTags($this->pinBoard->getTagsForUrl($url), $url);
             sort($tags);
@@ -287,7 +294,7 @@ class TwitterCollector implements CollectorInterface
     }
 
     /**
-     * @param PinBoard|null $pinBoard
+     * @param  PinBoard|null  $pinBoard
      */
     public function setPinBoard(?PinBoard $pinBoard): void
     {
