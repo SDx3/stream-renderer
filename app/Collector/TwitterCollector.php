@@ -240,7 +240,7 @@ class TwitterCollector implements CollectorInterface
         try {
             $res = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=nl&dnt=true', $url));
         } catch (ClientException $e) {
-            $this->logger->error(sprintf('Could not get oembed for tweet #%s', $id));
+            $this->logger->debug(sprintf('Could not get oembed for tweet #%s', $id));
             return [];
         }
 
