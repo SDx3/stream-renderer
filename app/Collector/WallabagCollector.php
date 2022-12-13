@@ -29,6 +29,7 @@ use App\Data\PinBoard;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 use JsonException;
 use Monolog\Logger;
 
@@ -104,8 +105,8 @@ class WallabagCollector implements CollectorInterface
     private function getAccessToken(): void
     {
         $this->logger->debug('WallabagCollector will now get an access token.');
-        $client   = new Client;
-        $opts     = [
+        $client = new Client;
+        $opts   = [
             'form_params' => [
                 'grant_type'    => 'password',
                 'client_id'     => $this->configuration['client_id'],
@@ -114,9 +115,14 @@ class WallabagCollector implements CollectorInterface
                 'password'      => $this->configuration['password'],
             ],
         ];
-        $url      = sprintf('%s/oauth/v2/token', $this->configuration['host']);
-        $response = $client->post($url, $opts);
-        $body     = (string) $response->getBody();
+        $url    = sprintf('%s/oauth/v2/token', $this->configuration['host']);
+        try {
+            $response = $client->post($url, $opts);
+        } catch (ServerException $e) {
+            $this->logger->error(sprintf('The Wallabag server is down: %s', $e->getMessage()));
+            exit;
+        }
+        $body = (string)$response->getBody();
         try {
             $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
@@ -153,7 +159,7 @@ class WallabagCollector implements CollectorInterface
                 //$page++;
                 continue;
             }
-            $body = (string) $response->getBody();
+            $body = (string)$response->getBody();
             try {
                 $results = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
@@ -163,7 +169,10 @@ class WallabagCollector implements CollectorInterface
                 continue;
             }
 
-            $this->logger->addRecord($results['total'] > 0 ? 200 : 100, sprintf('WallabagCollector found %d new article(s) to make public.', $results['total']));
+            $this->logger->addRecord(
+                $results['total'] > 0 ? 200 : 100,
+                sprintf('WallabagCollector found %d new article(s) to make public.', $results['total'])
+            );
 
             if ($results['pages'] <= $page) {
                 $this->logger->debug('WallabagCollector has no more pages to process.');
@@ -211,7 +220,7 @@ class WallabagCollector implements CollectorInterface
             $this->logger->debug(sprintf('WallabagCollector is now working on page #%d.', $page));
             $url      = sprintf($articlesUrl, $this->configuration['host'], $page);
             $response = $client->get($url, $opts);
-            $body     = (string) $response->getBody();
+            $body     = (string)$response->getBody();
             try {
                 $results = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
@@ -242,7 +251,7 @@ class WallabagCollector implements CollectorInterface
     }
 
     /**
-     * @param array $item
+     * @param  array  $item
      * @return array
      */
     private function processArticle(array $item): array
@@ -349,7 +358,7 @@ class WallabagCollector implements CollectorInterface
     }
 
     /**
-     * @param PinBoard|null $pinBoard
+     * @param  PinBoard|null  $pinBoard
      */
     public function setPinBoard(?PinBoard $pinBoard): void
     {
