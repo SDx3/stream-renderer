@@ -120,14 +120,14 @@ class WallabagCollector implements CollectorInterface
             $response = $client->post($url, $opts);
         } catch (ServerException $e) {
             $this->logger->error(sprintf('The Wallabag server is down: %s', $e->getMessage()));
-            exit;
+            exit(1);
         }
         $body = (string)$response->getBody();
         try {
             $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             $this->logger->error(sprintf('The Wallabag token is unexpectedly not JSON: %s', $e->getMessage()));
-            exit;
+            exit(1);
         }
         $this->logger->debug(sprintf('WallabagCollector has collected access token %s.', $this->token['access_token']));
     }

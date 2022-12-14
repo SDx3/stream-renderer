@@ -77,7 +77,7 @@ class TwitterCollector implements CollectorInterface
         if (!array_key_exists('data', $tweets)) {
             $this->logger->debug('Error during collection.');
             var_dump($tweets);
-            exit;
+            exit(1);
         }
         $this->logger->debug(sprintf('Now collecting %d tweets...', count($tweets['data'])));
         $total = count($tweets['data']);
@@ -199,7 +199,7 @@ class TwitterCollector implements CollectorInterface
         echo "Then take the refresh token from the vagrant VM page you'll be redirected to.\n";
         echo "\n";
 
-        exit;
+        exit(1);
     }
 
     /**

@@ -19,6 +19,12 @@ fi
 
 php index.php
 
+if [ $? -ne 0 ]
+then
+  echo "Build script failed, will not continue."
+  exit 1
+fi
+
 export $(egrep -v '^#' .env | xargs)
 cd $SCRIPT_DIR/build
 
