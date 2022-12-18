@@ -218,9 +218,14 @@ class WallabagCollector implements CollectorInterface
 
         while (true === $hasMore) {
             $this->logger->debug(sprintf('WallabagCollector is now working on page #%d.', $page));
-            $url      = sprintf($articlesUrl, $this->configuration['host'], $page);
-            $response = $client->get($url, $opts);
-            $body     = (string)$response->getBody();
+            $url = sprintf($articlesUrl, $this->configuration['host'], $page);
+            try {
+                $response = $client->get($url, $opts);
+            } catch (ServerException $e) {
+                $this->logger->error(sprintf('The Wallabag server is down: %s', $e->getMessage()));
+                exit(1);
+            }
+            $body = (string)$response->getBody();
             try {
                 $results = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
