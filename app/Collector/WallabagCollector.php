@@ -82,6 +82,7 @@ class WallabagCollector implements CollectorInterface
     {
         if (!file_exists($this->cacheFile)) {
             $this->logger->debug('WallabagCollector found no cache file, so it\'s out of date.');
+
             return true;
         }
         $content = file_get_contents($this->cacheFile);
@@ -92,6 +93,7 @@ class WallabagCollector implements CollectorInterface
         // diff is over 12hrs
         if (time() - $json['moment'] > (12 * 60 * 60)) {
             $this->logger->debug('WallabagCollector cache is outdated.');
+
             return true;
         }
         $this->logger->debug('WallabagCollector cache is fresh!');
@@ -256,7 +258,8 @@ class WallabagCollector implements CollectorInterface
     }
 
     /**
-     * @param  array  $item
+     * @param array $item
+     *
      * @return array
      */
     private function processArticle(array $item): array
@@ -341,7 +344,9 @@ class WallabagCollector implements CollectorInterface
         foreach ($this->collection as $index => $entry) {
             $this->logger->debug(sprintf('Now processing %s', $entry['url']));
             $entry['date']            = new Carbon($entry['date'], $_ENV['TZ']);
-            $entry['tags']            = $this->pinBoard->filterTags($entry['tags'], $entry['url']);
+            if (null !== $this->pinBoard) {
+                $entry['tags'] = $this->pinBoard->filterTags($entry['tags'], $entry['url']);
+            }
             $this->collection[$index] = $entry;
         }
     }
@@ -363,7 +368,7 @@ class WallabagCollector implements CollectorInterface
     }
 
     /**
-     * @param  PinBoard|null  $pinBoard
+     * @param PinBoard|null $pinBoard
      */
     public function setPinBoard(?PinBoard $pinBoard): void
     {
