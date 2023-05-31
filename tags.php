@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 return [
@@ -66,7 +67,7 @@ return [
         'bluetooth'              => [],
         'bodybuilding'           => [],
         'burnout'                => [],
-        'business'               => ['business-technology', 'corporate', 'corporateincompetence'],
+        'business'               => ['business-technology', 'corporate', 'corporateincompetence', 'corporations'],
         'biology'                => [],
         'birds'                  => [],
 
@@ -138,7 +139,7 @@ return [
         'dkim'                   => [],
 
         // E
-        'employment'             => ['job', 'jobs', 'work', 'antiwork'],
+        'employment'             => ['job', 'jobs', 'work', 'antiwork', 'werk'],
         'economics'              => ['economy'],
         'education'              => [],
         'eidas'                  => [],
@@ -147,10 +148,12 @@ return [
         'encryption'             => [],
         'engineering'            => [],
         'espionage'              => ['spionage', 'cyberespionage', 'cyberspionage'],
-        'ethics'                 => [],
+        'ethics'                 => ['medical ethics'],
         'europe'                 => ['eu'],
         'exercise'               => [],
         'extremism'              => [],
+        'ecc'                    => ['elliptic curves'],
+        'euthanasia' => [],
 
         // F
         'facebook'               => ['fb'],
@@ -166,7 +169,7 @@ return [
         'fraud'                  => [],
         'freedom'                => [],
         'functional-programming' => ['functionalprogramming'],
-        'funny'                  => ['humour', 'humor', 'fun'],
+        'funny'                  => ['humour', 'humor', 'fun', 'satire', 'nerd-humor'],
         'future'                 => [],
 
         // G
@@ -185,7 +188,7 @@ return [
 
         // H
 
-        'hacking'                => ['hacker', 'hack'],
+        'hacking'                => ['hacker', 'hack', 'hackers'],
         'han'                    => [],
         'hardware'               => [],
         'health'                 => [],
@@ -209,7 +212,15 @@ return [
         // J
         // K
         'klokkenluiders'         => [],
-        'knowledge-management'   => ['knowledgemanagment', 'knowledge management', 'knowledgemanagement', 'knowledge', 'tacit-knowledge', 'thinking', 'thought'],
+        'knowledge-management'   => [
+            'knowledgemanagment',
+            'knowledge management',
+            'knowledgemanagement',
+            'knowledge',
+            'tacit-knowledge',
+            'thinking',
+            'thought',
+        ],
         'kpn'                    => [],
 
         // L
@@ -270,9 +281,19 @@ return [
         'programming'              => [],
         'physics'                  => [],
         'private'                  => [],
+        'poems'                    => ['poezie', 'poetry'],
 
         // Q
-        'quantum-cryptography'     => ['quantum', 'post-quantum', 'quantum cryptography', 'post-quantum-cryptography', 'pqc', 'pqe', 'post-quatum', 'quantumcomputing'],
+        'quantum-cryptography'     => [
+            'quantum',
+            'post-quantum',
+            'quantum cryptography',
+            'post-quantum-cryptography',
+            'pqc',
+            'pqe',
+            'post-quatum',
+            'quantumcomputing',
+        ],
         'quantum-key-distribution' => ['qkd'],
 
         // R
@@ -282,6 +303,7 @@ return [
         'radio'                    => [],
         'red-teaming'              => ['red_teaming', 'redteam'],
         'russia'                   => [],
+        'reading'                  => ['libraries', 'alternative_libraries', 'little_libraries', 'antilibrary'],
 
 
         // S
@@ -291,7 +313,14 @@ return [
         'sci-fi'                   => ['scifi'],
         'security'                 => [],
         'self-hosted'              => ['selfhost'],
-        'self-improvement'         => ['personal-improvement', 'self_help', 'selfhelp', 'personal-development', 'professional_development', 'personal development'],
+        'self-improvement'         => [
+            'personal-improvement',
+            'self_help',
+            'selfhelp',
+            'personal-development',
+            'professional_development',
+            'personal development',
+        ],
         'sexism'                   => [],
         'signal'                   => [],
         'smart'                    => [],
@@ -314,6 +343,8 @@ return [
         'signatures'               => [],
         'software'                 => [],
         'sociology'                => [],
+        'sabsa'                    => [],
+        'stress'                   => [],
 
 
         // T
