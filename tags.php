@@ -75,6 +75,7 @@ return [
         'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa', 'hashing'],
         'capitalism'             => [],
         'carriere'               => ['career'],
+        'automotive'             => ['self-driving'],
         'centralised'            => ['centralization'],
         'children'               => [],
         'china'                  => [],
@@ -99,7 +100,7 @@ return [
         'covid'                  => ['covid-19', 'covid19', 'corona'],
         'creativity'             => [],
         'crime'                  => [],
-        'critical-thought'       => ['critical', 'critique', 'resist'],
+        'critical-thought'       => ['critical', 'critique', 'resist', 'criticisms'],
         'crowd'                  => [],
         'cryptanalysis'          => [],
         'crypto-currencies'      => ['cryptocurrencies', 'ethereum', 'crypto-currency', 'cryptocurrency', 'crypto', 'coins'],
@@ -137,6 +138,7 @@ return [
         'dutch'                  => [],
         'dystopia'               => [],
         'dkim'                   => [],
+        'data'                   => ['data-driven'],
 
         // E
         'employment'             => ['job', 'jobs', 'work', 'antiwork', 'werk'],
@@ -153,7 +155,7 @@ return [
         'exercise'               => [],
         'extremism'              => [],
         'ecc'                    => ['elliptic curves'],
-        'euthanasia' => [],
+        'euthanasia'             => [],
 
         // F
         'facebook'               => ['fb'],
@@ -191,7 +193,7 @@ return [
         'hacking'                => ['hacker', 'hack', 'hackers'],
         'han'                    => [],
         'hardware'               => [],
-        'health'                 => [],
+        'health'                 => ['death'],
         'history'                => [],
         'home-automation'        => ['home_automation', 'homeassistant'],
         'homomorphic-encryption' => ['homomorphic encryption', 'homomorphic'],
@@ -225,7 +227,7 @@ return [
 
         // L
         'love'                   => ['amour'],
-        'leadership'             => [],
+        'leadership'             => ['management'],
         'learning'               => ['learn', 'leer'],
         'leesvoer'               => [],
         'linux'                  => [],
@@ -303,7 +305,8 @@ return [
         'radio'                    => [],
         'red-teaming'              => ['red_teaming', 'redteam'],
         'russia'                   => [],
-        'reading'                  => ['libraries', 'alternative_libraries', 'little_libraries', 'antilibrary'],
+        'reading'                  => ['libraries', 'alternative_libraries', 'little_libraries', 'antilibrary', 'library'],
+        'research'                 => [],
 
 
         // S
@@ -341,10 +344,10 @@ return [
         'sustainability'           => [],
         'switzerland'              => [],
         'signatures'               => [],
-        'software'                 => [],
+        'software'                 => ['softwareengineering'],
         'sociology'                => [],
         'sabsa'                    => [],
-        'stress'                   => [],
+        'stress'                   => ['work-life'],
 
 
         // T
@@ -354,7 +357,7 @@ return [
         'technology'               => ['tech'],
         'terrorism'                => ['terrorist'],
         'thought'                  => [],
-        'threat-modeling'          => ['threat-modelling'],
+        'threat-modeling'          => ['threat-modelling','threat-model','threat modelling'],
         'time-management'          => ['time', 'time-tracking', 'time-confetti', 'prioritization'],
         'tls'                      => [],
         'tools'                    => ['tool'],
@@ -370,6 +373,7 @@ return [
 
         // V
         'video'                    => [],
+        'vulnerabilities'          => ['cve'],
 
         // W
         'web2.0'                   => [],
