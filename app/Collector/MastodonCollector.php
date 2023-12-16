@@ -87,7 +87,7 @@ class MastodonCollector implements CollectorInterface
         /** @var array $toot */
         foreach ($toots as $toot) {
             $index++;
-            $this->logger->debug(sprintf('[%d/%d] Processing tweet...', $index, $total));
+            $this->logger->debug(sprintf('[%d/%d] Processing toot...', $index, $total));
             $this->collection[] = $this->getToot($toot);
         }
         $this->saveToCache();
