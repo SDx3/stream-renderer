@@ -34,13 +34,13 @@ class PinBoard
 {
     private array  $allowedTags = [];
     private array  $blockedTags = [];
+    private array  $localIgnoreList;
     private Logger $logger;
     private string $tagCacheFile;
     private string $token;
     private string $urlCacheFile;
     private array  $urls;
     private string $user;
-    private array  $localIgnoreList;
 
     /**
      *
@@ -73,7 +73,24 @@ class PinBoard
     }
 
     /**
+     * @param array $allowedTags
+     */
+    public function XsetAllowedTags(array $allowedTags): void
+    {
+        $this->allowedTags = $allowedTags;
+    }
+
+    /**
+     * @param array $blockedTags
+     */
+    public function XsetBlockedTags(array $blockedTags): void
+    {
+        $this->blockedTags = $blockedTags;
+    }
+
+    /**
      * @param array $articles
+     *
      * @return array
      */
     public function addTagsToList(array $articles): array
@@ -96,6 +113,7 @@ class PinBoard
 
     /**
      * @param string $url
+     *
      * @return array
      */
     public function getTagsForUrl(string $url): array
@@ -126,7 +144,7 @@ class PinBoard
         }
         $tags = [];
         if (200 === $res->getStatusCode()) {
-            $body = (string) $res->getBody();
+            $body = (string)$res->getBody();
             $json = json_decode($body, true);
             $tags = array_merge($tags, $json[0]['popular']);
             $tags = array_merge($tags, $json[1]['recommended']);
@@ -142,11 +160,32 @@ class PinBoard
     }
 
     /**
+     * This method filters some tags that Pinboard people tend to give their posts
+     * that I want to ignore.
+     *
+     * @param array $tags
+     *
+     * @return array
+     */
+    private function localFilter(array $tags): array
+    {
+        $return = [];
+        foreach ($tags as $tag) {
+            $search = strtolower($tag);
+            if (!in_array($search, $this->localIgnoreList, true)) {
+                $return[] = $tag;
+            }
+        }
+        return $return;
+    }
+
+    /**
      * Will take the tags from the (cached) post and return only the tags that are allowed.
      * Tags that are in the cache file will be ignored (unless allowed). Newly found tags
      * will get a shout-out.
      *
      * @param array $tags
+     *
      * @return array
      */
     public function filterTags(array $tags, string $url): array
@@ -174,6 +213,7 @@ class PinBoard
 
     /**
      * @param string $tag
+     *
      * @return bool
      */
     private function tagIsBlocked(string $tag): bool
@@ -194,6 +234,7 @@ class PinBoard
 
     /**
      * @param string $tag
+     *
      * @return bool
      */
     private function tagIsAllowed(string $tag): bool
@@ -222,6 +263,7 @@ class PinBoard
 
     /**
      * @param string $tag
+     *
      * @return string
      */
     private function normalizeTag(string $tag): string
@@ -239,22 +281,6 @@ class PinBoard
         }
         $this->logger->info(sprintf('Return original tag "%s".', $tag));
         return $tag;
-    }
-
-    /**
-     * @param array $allowedTags
-     */
-    public function XsetAllowedTags(array $allowedTags): void
-    {
-        $this->allowedTags = $allowedTags;
-    }
-
-    /**
-     * @param array $blockedTags
-     */
-    public function XsetBlockedTags(array $blockedTags): void
-    {
-        $this->blockedTags = $blockedTags;
     }
 
     /**
@@ -295,25 +321,6 @@ class PinBoard
     public function setUser(string $user): void
     {
         $this->user = $user;
-    }
-
-    /**
-     * This method filters some tags that Pinboard people tend to give their posts
-     * that I want to ignore.
-     *
-     * @param array $tags
-     * @return array
-     */
-    private function localFilter(array $tags): array
-    {
-        $return = [];
-        foreach ($tags as $tag) {
-            $search = strtolower($tag);
-            if (!in_array($search, $this->localIgnoreList, true)) {
-                $return[] = $tag;
-            }
-        }
-        return $return;
     }
 
 

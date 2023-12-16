@@ -25,12 +25,14 @@
 declare(strict_types=1);
 
 use App\Collector\FirefoxCollector;
+use App\Collector\MastodonCollector;
 use App\Collector\RSSCollector;
 use App\Collector\TwitterCollector;
 use App\Collector\WallabagCollector;
 use App\Data\PinBoard;
 use App\Filter\PostFilter;
 use App\Processor\FirefoxProcessor;
+use App\Processor\MastodonProcessor;
 use App\Processor\RSSProcessor;
 use App\Processor\TwitterProcessor;
 use App\Processor\WallabagProcessor;
@@ -60,7 +62,9 @@ foreach ($path as $file) {
 }
 $log->debug('Done!');
 
+// all collected items
 $bookmarkedTweets = [];
+$bookmarkedToots  = [];
 $articles         = [];
 $bookmarks        = [];
 $feedArticles     = [];
@@ -117,6 +121,7 @@ if ('true' === $_ENV['RUN_WALLABAG']) {
 // make pinboard save its list of blocked tags:
 $pinBoard?->saveCache();
 
+
 // collect bookmarks
 if ('true' === $_ENV['RUN_BOOKMARKS']) {
     $collector = new FirefoxCollector();
@@ -129,7 +134,7 @@ if ('true' === $_ENV['RUN_BOOKMARKS']) {
     );
     $collector->collect();
     $bookmarks = $collector->getCollection();
-    $pinBoard = $collector->getPinBoard();
+    $pinBoard  = $collector->getPinBoard();
 }
 
 // make pinboard save its list of blocked tags:
@@ -143,8 +148,32 @@ if ('true' === $_ENV['RUN_RSS']) {
     $collector->setConfiguration(['feed' => $_ENV['PUBLISHED_ARTICLES_FEED']]);
     $collector->collect();
     $feedArticles = $collector->getCollection();
+    $pinBoard     = $collector->getPinBoard();
+}
+
+// collect mastodon
+if ('true' === $_ENV['RUN_MASTODON']) {
+    $collector = new MastodonCollector;
+    $collector->setLogger($log);
+    $collector->setPinBoard($pinBoard);
+    $collector->setConfiguration(
+        [
+            'host'    => $_ENV['MASTODON_HOST'],
+            'user'    => $_ENV['MASTODON_USER'],
+            'redirect' => $_ENV['MASTODON_REDIRECT'],
+            'key'     => $_ENV['MASTODON_KEY'],
+            'secret'  => $_ENV['MASTODON_SECRET'],
+            'user_id' => $_ENV['TWITTER_USER_ID'],
+        ]
+    );
+    $collector->collect();
+    $bookmarkedToots = $collector->getCollection();
+
+    // grab PinBoard instance from the Twitter collector. it will contain all the tags it found.
     $pinBoard = $collector->getPinBoard();
 }
+$pinBoard?->saveCache();
+
 // make pinboard save its list of blocked tags:
 $pinBoard?->saveCache();
 
@@ -156,19 +185,31 @@ $filter->setWallabag($articles);
 $filter->setRss($feedArticles);
 $filter->setTweets($bookmarkedTweets);
 $filter->setBookmarks($bookmarks);
+$filter->setToots($bookmarkedToots);
 
 $articles         = $filter->getFilteredWallabag();
 $feedArticles     = $filter->getFilteredRss();
 $bookmarkedTweets = $filter->getFilteredTweets();
 $bookmarks        = $filter->getFilteredBookmarks();
+$bookmarkedToots = $filter->getFilteredToots();
+
 
 // now process the result of the wallabag collection
 if ('true' === $_ENV['RUN_WALLABAG']) {
     $processor = new WallabagProcessor;
     $processor->setLogger($log);
     $processor->setDestination(realpath($_ENV['BLOG_PATH']));
-    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
     $processor->process($articles);
+}
+
+// now process the result of the Mastodon collection
+if ('true' === $_ENV['RUN_MASTODON']) {
+    $processor = new MastodonProcessor;
+    $processor->setLogger($log);
+    $processor->setDestination(realpath($_ENV['BLOG_PATH']));
+    $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
+    $processor->process($bookmarkedToots);
 }
 
 // now process RSS
@@ -176,7 +217,7 @@ if ('true' === $_ENV['RUN_RSS']) {
     $processor = new RSSProcessor;
     $processor->setLogger($log);
     $processor->setDestination(realpath($_ENV['BLOG_PATH']));
-    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
     $processor->process($feedArticles);
 }
 
@@ -185,15 +226,17 @@ if ('true' === $_ENV['RUN_TWITTER']) {
     $processor = new TwitterProcessor;
     $processor->setLogger($log);
     $processor->setDestination(realpath($_ENV['BLOG_PATH']));
-    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
     $processor->process($bookmarkedTweets);
 }
 
 // now process bookmarks
 if ('true' === $_ENV['RUN_BOOKMARKS']) {
+
+
     $processor = new FirefoxProcessor;
     $processor->setLogger($log);
     $processor->setDestination(realpath($_ENV['BLOG_PATH']));
-    $processor->setTitleLength((int) $_ENV['TITLE_LENGTH']);
+    $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
     $processor->process($bookmarks);
 }

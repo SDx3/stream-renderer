@@ -2,11 +2,15 @@
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+#
+# If you run this locally, the result ends up in the other repository.
+#
+
 # clone GitHub repository
 rm -rf $SCRIPT_DIR/build
 mkdir -p $SCRIPT_DIR/build
 cd $SCRIPT_DIR/build
-git clone https://github.com/SDx3/sanderdorigo.nl.git . > /dev/null 2>&1
+git clone https://github.com/SDx3/sanderdorigo.nl.git .
 cd $SCRIPT_DIR
 
 if [ "$1" == "--clean" ]; then

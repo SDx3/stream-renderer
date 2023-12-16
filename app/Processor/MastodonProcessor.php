@@ -30,15 +30,14 @@ use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 /**
- * Class WallabagProcessor
+ * Class MastodonProcessor
  */
-class WallabagProcessor implements ProcessorInterface
+class MastodonProcessor implements ProcessorInterface
 {
+
     private string $destination;
     private Logger $logger;
     private int    $titleLength = 50;
-
-    use ProcessorTrait;
 
     /**
      * @inheritDoc
@@ -52,21 +51,20 @@ class WallabagProcessor implements ProcessorInterface
             'cache' => CACHE,
             'debug' => true,
         ]);
-        $template = $twig->load('wallabag.twig');
+        $template = $twig->load('mastodon.twig');
         foreach ($items as $item) {
-
-            $search               = [
-                '"',
-            ];
-            $replace              = [
-                '\\"',
-            ];
             $item['title_length'] = $this->titleLength;
             $item['year']         = $item['date']->year;
+            $parts = parse_url($item['url']);
+            $item['host']         = $parts['host'];
             $item['month']        = $item['date']->format('m');
+            $search               = ['"'];
+            $replace              = ['\\"'];
             $item['title']        = str_replace($search, $replace, $item['title']);
             $content              = $template->render($item);
-            $full                 = $this->getFileName($item['date'], 'wallabag', $this->destination);
+            $date                 = $item['date']->format('Y-m-d-H-i');
+            $filename             = sprintf('%s-toot.md', $date);
+            $full                 = sprintf('%s/%s', $this->destination, $filename);
             file_put_contents($full, $content);
         }
         $this->logger->debug('Done!');
@@ -78,7 +76,7 @@ class WallabagProcessor implements ProcessorInterface
     public function setDestination(string $destination): void
     {
         $this->destination = $destination;
-        $this->logger->debug(sprintf('WallabagProcessor has a destination: %s', $destination));
+        $this->logger->debug(sprintf('MastodonProcessor has a destination: %s', $destination));
     }
 
     /**
@@ -87,7 +85,7 @@ class WallabagProcessor implements ProcessorInterface
     public function setLogger(Logger $logger): void
     {
         $this->logger = $logger;
-        $this->logger->debug('WallabagProcessor has a logger!');
+        $this->logger->debug('MastodonProcessor has a logger!');
     }
 
     /**

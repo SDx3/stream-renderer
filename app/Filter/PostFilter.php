@@ -34,6 +34,7 @@ class PostFilter
     private array  $ignoreHosts;
     private Logger $logger;
     private array  $rss;
+    private array $toots;
     private array  $tweets;
     private array  $wallabag;
 
@@ -100,7 +101,8 @@ class PostFilter
     }
 
     /**
-     * @param  string  $host
+     * @param string $host
+     *
      * @return bool
      */
     private function isIgnoredHost(string $host): bool
@@ -116,6 +118,7 @@ class PostFilter
 
     /**
      * Will loop over RSS articles and make sure they're not in Wallabag or are Tweets (unlikely tho)
+     *
      * @return array
      */
     public function getFilteredRss(): array
@@ -164,6 +167,24 @@ class PostFilter
     }
 
     /**
+     * Collection of Toots is currently unfiltered.
+     *
+     * @return array
+     */
+    public function getFilteredToots(): array
+    {
+        $result = [];
+        /** @var array $toot */
+        foreach ($this->toots as $toot) {
+            if (0 === count($toot)) {
+                continue;
+            }
+            $result[] = $toot;
+        }
+        return $result;
+    }
+
+    /**
      * Returns everything from Wallabag except Tweets that are also bookmarked.
      *
      * Tweets that are not bookmarked will generate a warning.
@@ -197,7 +218,7 @@ class PostFilter
     }
 
     /**
-     * @param  array  $bookmarks
+     * @param array $bookmarks
      */
     public function setBookmarks(array $bookmarks): void
     {
@@ -205,7 +226,7 @@ class PostFilter
     }
 
     /**
-     * @param  array  $ignoreHosts
+     * @param array $ignoreHosts
      */
     public function setIgnoreHosts(array $ignoreHosts): void
     {
@@ -213,7 +234,7 @@ class PostFilter
     }
 
     /**
-     * @param  Logger  $logger
+     * @param Logger $logger
      */
     public function setLogger(Logger $logger): void
     {
@@ -222,15 +243,20 @@ class PostFilter
     }
 
     /**
-     * @param  array  $rss
+     * @param array $rss
      */
     public function setRss(array $rss): void
     {
         $this->rss = $rss;
     }
 
+    public function setToots(array $toots): void
+    {
+        $this->toots = $toots;
+    }
+
     /**
-     * @param  array  $tweets
+     * @param array $tweets
      */
     public function setTweets(array $tweets): void
     {
@@ -238,7 +264,7 @@ class PostFilter
     }
 
     /**
-     * @param  array  $wallabag
+     * @param array $wallabag
      */
     public function setWallabag(array $wallabag): void
     {

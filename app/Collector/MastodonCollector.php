@@ -35,9 +35,9 @@ use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Logger;
 
 /**
- * Class TwitterCollector
+ * Class MastodonCollector
  */
-class TwitterCollector implements CollectorInterface
+class MastodonCollector implements CollectorInterface
 {
     private array     $collection = [];
     private array     $configuration;
@@ -49,22 +49,22 @@ class TwitterCollector implements CollectorInterface
      */
     public function collect(bool $skipCache = false): void
     {
-        $this->logger->debug('Start of Twitter collection.');
+        $this->logger->debug('Start of Mastodon collection.');
         $this->collection = [];
 
         if ($this->hasCache()) {
-            $this->logger->debug('Twitter collection is in cache, return that instead.');
+            $this->logger->debug('Mastodon collection is in cache, return that instead.');
             $this->getCache();
             return;
         }
 
         if (!$this->hasToken()) {
-            $this->logger->debug('Twitter collector has no token.');
+            $this->logger->debug('Mastodon collector has no token.');
             $this->getNewTokens();
         }
-        $this->logger->debug('Twitter collector has a token.');
+        $this->logger->debug('Mastodon collector has a token.');
 
-        $url    = sprintf('https://api.twitter.com/2/users/%s/bookmarks', $this->configuration['user_id']);
+        $url    = sprintf('https://%s/api/v1/bookmarks', $this->configuration['host']);
         $client = new Client;
         $opts   = [
             'headers' => [
@@ -74,25 +74,21 @@ class TwitterCollector implements CollectorInterface
         try {
             $res = $client->request('GET', $url, $opts);
         } catch (ClientException $e) {
-            $this->logger->error('Could not get bookmarks from Twitter.');
+            $this->logger->error('Could not get bookmarks from Mastodon.');
             if ($e->hasResponse()) {
                 $this->logger->error($e->getResponse()->getBody()->getContents());
             }
             return;
         }
-        $tweets = json_decode($res->getBody(), true);
-        if (!array_key_exists('data', $tweets)) {
-            $this->logger->debug('Error during collection.');
-            var_dump($tweets);
-            exit(1);
-        }
-        $this->logger->debug(sprintf('Now collecting %d tweets...', count($tweets['data'])));
-        $total = count($tweets['data']);
+        $toots = json_decode($res->getBody(), true);
+        $total = count($toots);
+        $this->logger->debug(sprintf('Now collecting %d toots...', $total));
         $index = 0;
-        foreach ($tweets['data'] as $tweet) {
+        /** @var array $toot */
+        foreach ($toots as $toot) {
             $index++;
             $this->logger->debug(sprintf('[%d/%d] Processing tweet...', $index, $total));
-            $this->collection[] = $this->getTweet($tweet['id']);
+            $this->collection[] = $this->getToot($toot);
         }
         $this->saveToCache();
         $this->logger->debug('Done!');
@@ -100,7 +96,7 @@ class TwitterCollector implements CollectorInterface
 
     private function hasCache(): bool
     {
-        $cacheFile = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        $cacheFile = sprintf('%s/%s', CACHE, 'mastodon-cache.json');
         if (!file_exists($cacheFile)) {
             $this->logger->debug('No cache file, return false.');
             return false;
@@ -120,7 +116,7 @@ class TwitterCollector implements CollectorInterface
      */
     private function getCache(): void
     {
-        $cacheFile        = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        $cacheFile        = sprintf('%s/%s', CACHE, 'mastodon-cache.json');
         $text             = file_get_contents($cacheFile);
         $json             = json_decode($text, true, 24);
         $objects          = $json['data'];
@@ -133,54 +129,22 @@ class TwitterCollector implements CollectorInterface
 
     private function hasToken(): bool
     {
-        $file = sprintf('%s/twitter.json', CACHE);
+        $file = sprintf('%s/mastodon.json', CACHE);
         if (!file_exists($file)) {
             $this->logger->debug('No cache file, so always false.');
             return false;
         }
         $content = file_get_contents($file);
         $json    = json_decode($content, true);
-        if (time() > $json['expire_time']) {
-            $this->logger->debug('Token is expired, need to get a new one.');
-            $this->configuration['refresh_token'] = $json['refresh_token'];
-            $this->getAccessToken();
-            return true;
-        }
+
+//        if (time() > $json['expire_time']) {
+//            $this->logger->debug('Token is expired, need to get a new one.');
+//            $this->configuration['refresh_token'] = $json['refresh_token'];
+//            $this->getAccessToken();
+//            return true;
+//        }
         $this->configuration['access_token'] = $json['access_token'];
         return true;
-    }
-
-    /**
-     * @return void
-     * @throws GuzzleException
-     */
-    private function getAccessToken(): void
-    {
-        $this->logger->debug('Need a new access token.');
-        $client = new Client;
-        $opts   = [
-            'headers'     => [
-                'Content-Type' => 'application/x-www-form-urlencoded',
-            ],
-            'auth'        => [$this->configuration['client_id'], $this->configuration['client_secret']],
-            'form_params' => [
-                'grant_type'    => 'refresh_token',
-                'refresh_token' => $this->configuration['refresh_token'],
-            ],
-        ];
-
-        $res  = $client->request('POST', 'https://api.twitter.com/2/oauth2/token', $opts);
-        $body = (string)$res->getBody();
-        $json = json_decode($body, true);
-
-        // add time:
-        $json['expire_time'] = time() + $json['expires_in'];
-
-        // save to file:
-        $file = sprintf('%s/twitter.json', CACHE);
-        file_put_contents($file, json_encode($json, JSON_PRETTY_PRINT));
-        $this->configuration['access_token']  = $json['access_token'];
-        $this->configuration['refresh_token'] = $json['refresh_token'];
     }
 
     /**
@@ -190,15 +154,17 @@ class TwitterCollector implements CollectorInterface
     private function getNewTokens(): never
     {
         $params = [
-            'response_type'         => 'code',
-            'client_id'             => $this->configuration['client_id'],
-            'redirect_uri'          => $_ENV['TWITTER_REDIRECT_URL'],
-            'scope'                 => 'tweet.read users.read bookmark.read offline.access',
-            'state'                 => (string)random_int(1, 1000),
-            'code_challenge'        => 'challenge',
-            'code_challenge_method' => 'plain',
+            'response_type' => 'code',
+            'client_id'     => $this->configuration['key'],
+            'redirect_uri'  => $this->configuration['redirect'],
+            'scope'         => 'read',
+            'state'         => (string)random_int(1, 1000),
         ];
-        $url    = 'https://twitter.com/i/oauth2/authorize?' . http_build_query($params);
+        // https://mastodon.example/oauth/authorize
+        //&redirect_uri=
+        //&response_type=code
+
+        $url = sprintf('https://%s/oauth/authorize?', $this->configuration['host']) . http_build_query($params);
         echo "Since you have no refresh token, please visit this URL:\n";
         echo $url;
         echo "\n";
@@ -210,64 +176,44 @@ class TwitterCollector implements CollectorInterface
     }
 
     /**
-     * @param string $id
+     * @param array $data
      *
      * @return array
      * @throws GuzzleException
      * @throws GuzzleException
      */
-    private function getTweet(string $id): array
+    private function getToot(array $data): array
     {
-        $this->logger->debug(sprintf('Downloading tweet #%s...', $id));
-        $params = [
-            'tweet.fields' => 'created_at,author_id',
-            'expansions'   => 'author_id',
-        ];
 
-        $url    = sprintf('https://api.twitter.com/2/tweets/%s?%s', $id, http_build_query($params));
-        $client = new Client;
-        $opts   = [
-            'headers' => [
-                'Authorization' => sprintf('Bearer %s', $this->configuration['access_token']),
-            ],
-        ];
+        // get oembed code.
 
-        $res   = $client->request('GET', $url, $opts);
-        $tweet = json_decode($res->getBody(), true);
-
-        // extract author twitter name:
-        $authorId   = $tweet['data']['author_id'];
-        $authorName = '';
-        foreach ($tweet['includes']['users'] as $user) {
-            if ($user['id'] === $authorId) {
-                $authorName = $user['username'];
-            }
-        }
-        $url    = sprintf('https://twitter.com/%s/status/%s', $authorName, $tweet['data']['id']);
+        $parts = parse_url($data['url']);
+        $url    = sprintf('https://%s/api/oembed', $parts['host']);
         $client = new Client;
         try {
-            $res = $client->get(sprintf('https://publish.twitter.com/oembed?url=%s&lang=nl&dnt=true', $url));
+            $res = $client->get(sprintf($url . '?url=' . $data['url'], $this->configuration['host']));
         } catch (ClientException $e) {
-            $this->logger->debug(sprintf('Could not get oembed for tweet #%s', $id));
+            $this->logger->debug(sprintf('Could not get oembed for toot %s', $data['url']));
+            $this->logger->debug($e->getMessage());
             return [];
         }
-
         $body = (string)$res->getBody();
         $json = json_decode($body, true);
+
         $tags = [];
         if (null !== $this->pinBoard) {
-            $tags = $this->pinBoard->filterTags($this->pinBoard->getTagsForUrl($url), $url);
+            $tags = $this->pinBoard->filterTags($this->pinBoard->getTagsForUrl($data['url']), $data['url']);
             sort($tags);
-            $this->logger->debug(sprintf('Set of tags for Tweet is now: %s', join(', ', $tags)));
+            $this->logger->debug(sprintf('Set of tags for toot is now: %s', join(', ', $tags)));
         }
 
         return [
-            'id'         => $tweet['data']['id'],
-            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at'], $_ENV['TZ']),
-            'title'      => $tweet['data']['text'],
-            'author'     => $authorName,
+            'id'         => $data['id'],
+            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $data['created_at'], $_ENV['TZ']),
+            'title'      => strip_tags($data['content']),
+            'author'     => $data['account']['display_name'],
             'categories' => $tags,
-            'url'        => $url,
+            'url'        => $data['url'],
             'html'       => $json['html'],
         ];
     }
@@ -277,7 +223,7 @@ class TwitterCollector implements CollectorInterface
      */
     private function saveToCache(): void
     {
-        $cacheFile = sprintf('%s/%s', CACHE, 'twitter-cache.json');
+        $cacheFile = sprintf('%s/%s', CACHE, 'mastodon-cache.json');
         $json      = [
             'moment' => time(),
             'data'   => $this->collection,
@@ -323,6 +269,40 @@ class TwitterCollector implements CollectorInterface
     public function setLogger(Logger $logger): void
     {
         $this->logger = $logger;
-        $this->logger->debug('TwitterCollector now has a logger!');
+        $this->logger->debug('MastodonCollector now has a logger!');
+    }
+
+    /**
+     * @return void
+     * @throws GuzzleException
+     */
+    private function getAccessToken(): void
+    {
+        die('E');
+        $this->logger->debug('Need a new access token.');
+        $client = new Client;
+        $opts   = [
+            'headers'     => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+            'auth'        => [$this->configuration['client_id'], $this->configuration['client_secret']],
+            'form_params' => [
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $this->configuration['refresh_token'],
+            ],
+        ];
+
+        $res  = $client->request('POST', 'https://api.twitter.com/2/oauth2/token', $opts);
+        $body = (string)$res->getBody();
+        $json = json_decode($body, true);
+
+        // add time:
+        $json['expire_time'] = time() + $json['expires_in'];
+
+        // save to file:
+        $file = sprintf('%s/twitter.json', CACHE);
+        file_put_contents($file, json_encode($json, JSON_PRETTY_PRINT));
+        $this->configuration['access_token']  = $json['access_token'];
+        $this->configuration['refresh_token'] = $json['refresh_token'];
     }
 }

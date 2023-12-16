@@ -343,7 +343,7 @@ class WallabagCollector implements CollectorInterface
         $this->logger->debug('WallabagCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
             $this->logger->debug(sprintf('Now processing %s', $entry['url']));
-            $entry['date']            = new Carbon($entry['date'], $_ENV['TZ']);
+            $entry['date'] = new Carbon($entry['date'], $_ENV['TZ']);
             if (null !== $this->pinBoard) {
                 $entry['tags'] = $this->pinBoard->filterTags($entry['tags'], $entry['url']);
             }

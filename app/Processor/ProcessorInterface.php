@@ -34,12 +34,14 @@ interface ProcessorInterface
 {
     /**
      * @param array $items
+     *
      * @return void
      */
     public function process(array $items): void;
 
     /**
      * @param string $destination
+     *
      * @return void
      */
     public function setDestination(string $destination): void;
@@ -51,6 +53,7 @@ interface ProcessorInterface
 
     /**
      * @param int $length
+     *
      * @return void
      */
     public function setTitleLength(int $length): void;

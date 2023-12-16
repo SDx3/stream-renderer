@@ -31,6 +31,7 @@ trait ProcessorTrait
      * @param Carbon $date
      * @param string $type
      * @param string $destination
+     *
      * @return string
      */
     protected function getFileName(Carbon $date, string $type, string $destination): string

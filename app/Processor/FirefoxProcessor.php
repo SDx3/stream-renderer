@@ -51,6 +51,7 @@ class FirefoxProcessor implements ProcessorInterface
             'debug' => true,
         ]);
         $template = $twig->load('bookmark.twig');
+
         foreach ($items as $item) {
             $item['title_length'] = $this->titleLength;
             $item['year']         = $item['date']->year;

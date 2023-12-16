@@ -1,0 +1,12 @@
+---
+title: "{% if title|length > title_length %}{{ title|slice(0,title_length)|raw }}...{% else %}{{ title|raw }}{% endif %}"
+id: {{ id }}
+date: {{ date }}
+icon: mastodon
+domains:
+- {{ host }}
+source: Mastodon
+{{ year }}: "{{ month }}"
+src_url: "{{ url }}"
+---
+{{ html|raw }}

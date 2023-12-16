@@ -76,7 +76,7 @@ class RSSCollector implements CollectorInterface
             $replace          = ["'"];
             $current['title'] = str_replace($search, $replace, $current['title']);
 
-            $tags    = [];
+            $tags = [];
             /** @var SimplePie_Category $cat */
             if (null !== $item->get_categories()) {
                 foreach ($item->get_categories() as $cat) {

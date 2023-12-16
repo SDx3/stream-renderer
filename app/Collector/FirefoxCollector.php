@@ -161,7 +161,7 @@ class FirefoxCollector implements CollectorInterface
                 } catch (ClientException $e) {
                     $this->logger->debug(sprintf('Could not get oEmbed for YouTube movie "%s".', $bookmark['uri']));
                     $include = false;
-                    $body    = (string) $res->getBody();
+                    $body    = (string)$res->getBody();
                 }
                 $json = json_decode($body, true);
                 $html = $json['html'];
@@ -210,6 +210,7 @@ class FirefoxCollector implements CollectorInterface
      * @param string $parentId
      * @param array  $set
      * @param array  $sorted
+     *
      * @return array
      */
     private function processChildren(string $parentId, array $set, array $sorted): array
@@ -244,6 +245,7 @@ class FirefoxCollector implements CollectorInterface
      * @param array  $sorted
      * @param string $id
      * @param array  $tags
+     *
      * @return array
      */
     private function getTags(array $sorted, string $id, array $tags): array
@@ -321,6 +323,7 @@ class FirefoxCollector implements CollectorInterface
 
     /**
      * @param PinBoard|null $pinBoard
+     *
      * @return void
      */
     public function setPinBoard(?PinBoard $pinBoard): void
