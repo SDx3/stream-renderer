@@ -11,6 +11,8 @@ categories:
 {% for category in categories %}
 - {{ category }}
 {% endfor %}
-
+{% for tag in tags %}
+    - "{{ tag }}"
+{% endfor %}
 ---
 Het oorspronkelijke artikel kan je lezen op [{{ host }}]({{ url }}).

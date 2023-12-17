@@ -8,5 +8,9 @@ domains:
 source: Spotify
 {{ year }}: "{{ month }}"
 src_url: "{{ url }}"
+categories:
+{% for tag in tags %}
+    - "{{ tag }}"
+{% endfor %}
 ---
 {{ html|raw }}

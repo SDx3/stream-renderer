@@ -11,7 +11,9 @@ categories:
 {% for category in categories %}
 - {{ category }}
 {% endfor %}
-
+{% for tag in tags %}
+    - "{{ tag }}"
+{% endfor %}
 ---
 {% if is_youtube %}
 {{ html|raw }}
