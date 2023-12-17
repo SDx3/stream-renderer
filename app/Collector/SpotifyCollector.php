@@ -320,7 +320,7 @@ class SpotifyCollector implements CollectorInterface
             $body         = (string)$response->getBody();
             $embedResults = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
             $item['html'] = $embedResults['html'];
-            $tags         = [];
+            $tags         = ['music'];
 
             // get tags for song:
             if (null !== $this->pinBoard) {
