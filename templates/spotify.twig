@@ -1,0 +1,12 @@
+---
+title: "{% if title|length > title_length %}{{ title|slice(0,title_length)|raw }}...{% else %}{{ title|raw }}{% endif %}"
+id: {{ id }}
+date: {{ date }}
+icon: spotify
+domains:
+- spotify.com
+source: Spotify
+{{ year }}: "{{ month }}"
+src_url: "{{ url }}"
+---
+{{ html|raw }}

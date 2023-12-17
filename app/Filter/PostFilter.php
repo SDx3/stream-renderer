@@ -38,6 +38,8 @@ class PostFilter
     private array  $tweets;
     private array  $wallabag;
 
+    private array $songs;
+
     /**
      * Bookmarks must not be bookmarked tweets or Wallabag items.
      *
@@ -167,6 +169,24 @@ class PostFilter
     }
 
     /**
+     * Collection of songs is currently unfiltered.
+     *
+     * @return array
+     */
+    public function getFilteredSongs(): array
+    {
+        $result = [];
+        /** @var array $song */
+        foreach ($this->songs as $song) {
+            if (0 === count($song)) {
+                continue;
+            }
+            $result[] = $song;
+        }
+        return $result;
+    }
+
+    /**
      * Collection of Toots is currently unfiltered.
      *
      * @return array
@@ -270,6 +290,15 @@ class PostFilter
     {
         $this->wallabag = $wallabag;
     }
+
+
+
+    public function setSongs(array $songs): void
+    {
+        $this->songs = $songs;
+    }
+
+
 
 
 }

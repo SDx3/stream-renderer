@@ -129,7 +129,7 @@ class MastodonCollector implements CollectorInterface
 
     private function hasToken(): bool
     {
-        $file = sprintf('%s/mastodon.json', CACHE);
+        $file = sprintf('%s/mastodon-auth.json', CACHE);
         if (!file_exists($file)) {
             $this->logger->debug('No cache file, so always false.');
             return false;
@@ -160,9 +160,6 @@ class MastodonCollector implements CollectorInterface
             'scope'         => 'read',
             'state'         => (string)random_int(1, 1000),
         ];
-        // https://mastodon.example/oauth/authorize
-        //&redirect_uri=
-        //&response_type=code
 
         $url = sprintf('https://%s/oauth/authorize?', $this->configuration['host']) . http_build_query($params);
         echo "Since you have no refresh token, please visit this URL:\n";
@@ -187,7 +184,7 @@ class MastodonCollector implements CollectorInterface
 
         // get oembed code.
 
-        $parts = parse_url($data['url']);
+        $parts  = parse_url($data['url']);
         $url    = sprintf('https://%s/api/oembed', $parts['host']);
         $client = new Client;
         try {

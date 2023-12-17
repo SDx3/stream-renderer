@@ -31,16 +31,7 @@ require 'init.php';
 if (array_key_exists('code', $_GET)) {
     $code = $_GET['code'];
 
-    // do request at Mastodon.
-
-    // curl -X POST \
-    //	-F 'client_id=your_client_id_here' \
-    //	-F 'client_secret=your_client_secret_here' \
-    //	-F 'redirect_uri=urn:ietf:wg:oauth:2.0:oob' \
-    //	-F 'grant_type=authorization_code' \
-    //	-F 'code=user_authzcode_here' \
-    //	-F 'scope=read write push' \
-    //	https://mastodon.example/oauth/token
+    // do request at Spotify.
 
     $client = new Client;
 
@@ -48,18 +39,16 @@ if (array_key_exists('code', $_GET)) {
         'headers'     => [
             'Content-Type' => 'application/x-www-form-urlencoded',
         ],
+        'auth'        => [$_ENV['SPOTIFY_CLIENT_ID'], $_ENV['SPOTIFY_CLIENT_SECRET']],
         'form_params' => [
-            'client_id'     => $_ENV['MASTODON_KEY'],
-            'client_secret' => $_ENV['MASTODON_SECRET'],
-            'redirect_uri'  => $_ENV['MASTODON_REDIRECT'],
             'grant_type'    => 'authorization_code',
             'code'          => $code,
-            'scope'         => 'read',
+            'redirect_uri'  => $_ENV['SPOTIFY_REDIRECT'],
         ],
     ];
 
     try {
-        $res = $client->request('POST', sprintf('https://%s/oauth/token', $_ENV['MASTODON_HOST']), $opts);
+        $res = $client->request('POST', 'https://accounts.spotify.com/api/token', $opts);
     } catch (ClientException $e) {
         echo ':(';
         var_dump($e->getRequest());
@@ -68,13 +57,14 @@ if (array_key_exists('code', $_GET)) {
     }
     $body                = (string)$res->getBody();
     $json                = json_decode($body, true);
+    $json['expire_time'] = time() + $json['expires_in'];
 
-    $file = sprintf('%s/mastodon-auth.json', CACHE);
+    $file = sprintf('%s/spotify-auth.json', CACHE);
     file_put_contents($file, json_encode($json, JSON_PRETTY_PRINT));
 
-    echo 'The mastodon access token is saved in the cache file!';
+    echo 'The Spotify access token is saved in the cache file!';
     echo '<br>';
-    echo 'If necessary, put this file in <code>cache/mastodon-auth.json</code>:';
+    echo 'If necessary, put this file in <code>cache/spotify-auth.json</code>:';
     echo '<br><br>';
     echo '<pre>' . json_encode($json, JSON_PRETTY_PRINT) . '</pre>';
     exit;

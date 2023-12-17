@@ -27,6 +27,7 @@ declare(strict_types=1);
 use App\Collector\FirefoxCollector;
 use App\Collector\MastodonCollector;
 use App\Collector\RSSCollector;
+use App\Collector\SpotifyCollector;
 use App\Collector\TwitterCollector;
 use App\Collector\WallabagCollector;
 use App\Data\PinBoard;
@@ -34,6 +35,7 @@ use App\Filter\PostFilter;
 use App\Processor\FirefoxProcessor;
 use App\Processor\MastodonProcessor;
 use App\Processor\RSSProcessor;
+use App\Processor\SpotifyProcessor;
 use App\Processor\TwitterProcessor;
 use App\Processor\WallabagProcessor;
 use Dotenv\Dotenv;
@@ -68,6 +70,7 @@ $bookmarkedToots  = [];
 $articles         = [];
 $bookmarks        = [];
 $feedArticles     = [];
+$songs = [];
 
 // create pinboard collection object
 $pinBoard = null;
@@ -151,7 +154,7 @@ if ('true' === $_ENV['RUN_RSS']) {
     $pinBoard     = $collector->getPinBoard();
 }
 
-// collect mastodon
+// collect Mastodon
 if ('true' === $_ENV['RUN_MASTODON']) {
     $collector = new MastodonCollector;
     $collector->setLogger($log);
@@ -172,6 +175,27 @@ if ('true' === $_ENV['RUN_MASTODON']) {
     // grab PinBoard instance from the Twitter collector. it will contain all the tags it found.
     $pinBoard = $collector->getPinBoard();
 }
+
+// collect Spotify
+if('true' === $_ENV['RUN_SPOTIFY']) {
+    $collector = new SpotifyCollector;
+    $collector->setLogger($log);
+    $collector->setPinBoard($pinBoard);
+    $collector->setConfiguration(
+        [
+            'client_id' => $_ENV['SPOTIFY_CLIENT_ID'],
+            'redirect' => $_ENV['SPOTIFY_REDIRECT'],
+            'username' => $_ENV['SPOTIFY_USERNAME'],
+        ]
+    );
+    $collector->collect();
+    $songs = $collector->getCollection();
+
+    // grab PinBoard instance from the Twitter collector. it will contain all the tags it found.
+    $pinBoard = $collector->getPinBoard();
+}
+
+
 $pinBoard?->saveCache();
 
 // make pinboard save its list of blocked tags:
@@ -186,12 +210,14 @@ $filter->setRss($feedArticles);
 $filter->setTweets($bookmarkedTweets);
 $filter->setBookmarks($bookmarks);
 $filter->setToots($bookmarkedToots);
+$filter->setSongs($songs);
 
 $articles         = $filter->getFilteredWallabag();
 $feedArticles     = $filter->getFilteredRss();
 $bookmarkedTweets = $filter->getFilteredTweets();
 $bookmarks        = $filter->getFilteredBookmarks();
 $bookmarkedToots = $filter->getFilteredToots();
+$songs = $filter->getFilteredSongs();
 
 
 // now process the result of the wallabag collection
@@ -228,6 +254,15 @@ if ('true' === $_ENV['RUN_TWITTER']) {
     $processor->setDestination(realpath($_ENV['BLOG_PATH']));
     $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
     $processor->process($bookmarkedTweets);
+}
+
+// now process songs
+if ('true' === $_ENV['RUN_SPOTIFY']) {
+    $processor = new SpotifyProcessor;
+    $processor->setLogger($log);
+    $processor->setDestination(realpath($_ENV['BLOG_PATH']));
+    $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
+    $processor->process($songs);
 }
 
 // now process bookmarks
