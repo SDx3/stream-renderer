@@ -70,7 +70,7 @@ $bookmarkedToots  = [];
 $articles         = [];
 $bookmarks        = [];
 $feedArticles     = [];
-$songs = [];
+$songs            = [];
 
 // create pinboard collection object
 $pinBoard = null;
@@ -161,12 +161,12 @@ if ('true' === $_ENV['RUN_MASTODON']) {
     $collector->setPinBoard($pinBoard);
     $collector->setConfiguration(
         [
-            'host'    => $_ENV['MASTODON_HOST'],
-            'user'    => $_ENV['MASTODON_USER'],
+            'host'     => $_ENV['MASTODON_HOST'],
+            'user'     => $_ENV['MASTODON_USER'],
             'redirect' => $_ENV['MASTODON_REDIRECT'],
-            'key'     => $_ENV['MASTODON_KEY'],
-            'secret'  => $_ENV['MASTODON_SECRET'],
-            'user_id' => $_ENV['TWITTER_USER_ID'],
+            'key'      => $_ENV['MASTODON_KEY'],
+            'secret'   => $_ENV['MASTODON_SECRET'],
+            'user_id'  => $_ENV['TWITTER_USER_ID'],
         ]
     );
     $collector->collect();
@@ -177,15 +177,16 @@ if ('true' === $_ENV['RUN_MASTODON']) {
 }
 
 // collect Spotify
-if('true' === $_ENV['RUN_SPOTIFY']) {
+if ('true' === $_ENV['RUN_SPOTIFY']) {
     $collector = new SpotifyCollector;
     $collector->setLogger($log);
     $collector->setPinBoard($pinBoard);
     $collector->setConfiguration(
         [
-            'client_id' => $_ENV['SPOTIFY_CLIENT_ID'],
-            'redirect' => $_ENV['SPOTIFY_REDIRECT'],
-            'username' => $_ENV['SPOTIFY_USERNAME'],
+            'client_id'     => $_ENV['SPOTIFY_CLIENT_ID'],
+            'client_secret' => $_ENV['SPOTIFY_CLIENT_SECRET'],
+            'redirect'      => $_ENV['SPOTIFY_REDIRECT'],
+            'username'      => $_ENV['SPOTIFY_USERNAME'],
         ]
     );
     $collector->collect();
@@ -216,8 +217,8 @@ $articles         = $filter->getFilteredWallabag();
 $feedArticles     = $filter->getFilteredRss();
 $bookmarkedTweets = $filter->getFilteredTweets();
 $bookmarks        = $filter->getFilteredBookmarks();
-$bookmarkedToots = $filter->getFilteredToots();
-$songs = $filter->getFilteredSongs();
+$bookmarkedToots  = $filter->getFilteredToots();
+$songs            = $filter->getFilteredSongs();
 
 
 // now process the result of the wallabag collection

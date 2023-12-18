@@ -235,33 +235,36 @@ class SpotifyCollector implements CollectorInterface
      */
     private function getAccessToken(): void
     {
-        die('get access token');
         $this->logger->debug('SpotifyCollector will now get an access token.');
         $client = new Client;
         $opts   = [
             'form_params' => [
-                'grant_type'    => 'password',
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $this->configuration['refresh_token'],
                 'client_id'     => $this->configuration['client_id'],
-                'client_secret' => $this->configuration['client_secret'],
-                'username'      => $this->configuration['username'],
-                'password'      => $this->configuration['password'],
+            ],
+            'auth'        => [$this->configuration['client_id'], $this->configuration['client_secret']],
+            'headers'     => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
             ],
         ];
-        $url    = 'https://accounts.spotify.com/authorize';
+        $url    = 'https://accounts.spotify.com/api/token';
         try {
             $response = $client->post($url, $opts);
         } catch (ServerException $e) {
-            $this->logger->error(sprintf('The Wallabag server is down: %s', $e->getMessage()));
+            $this->logger->error(sprintf('The Spotify server is down: %s', $e->getMessage()));
             exit(1);
         }
         $body = (string)$response->getBody();
+        $json = json_decode($body, true);
+        $this->configuration['access_token'] = $json['access_token'];
         try {
             $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            $this->logger->error(sprintf('The Wallabag token is unexpectedly not JSON: %s', $e->getMessage()));
+            $this->logger->error(sprintf('The Spotify token is unexpectedly not JSON: %s', $e->getMessage()));
             exit(1);
         }
-        $this->logger->debug(sprintf('WallabagCollector has collected access token %s.', $this->token['access_token']));
+        $this->logger->debug(sprintf('SpotifyCollector has collected access token %s.', $this->token['access_token']));
     }
 
     /**
