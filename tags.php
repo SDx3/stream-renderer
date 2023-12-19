@@ -31,8 +31,7 @@ return [
         'android'                => [],
         'animals'                => [],
         'anonimiteit'            => [],
-        'api'                    => [],
-        'appdev'                 => [],
+        'api'                    => ['apis'],
         'apple'                  => [],
         'appsec'                 => [],
         'art'                    => [],
@@ -72,9 +71,9 @@ return [
         'birds'                  => [],
 
         // C
-        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa', 'hashing'],
+        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa', 'hashing', 'ciphertext'],
         'capitalism'             => [],
-        'carriere'               => ['career'],
+        'carriere'               => ['career', 'carreer', 'career-advice'],
         'automotive'             => ['self-driving'],
         'centralised'            => ['centralization'],
         'children'               => [],
@@ -89,7 +88,7 @@ return [
         'comedy'                 => [],
         'communication'          => ['comms', 'communications'],
         'computer'               => [],
-        'computer-science'       => ['computer_science', 'cs', 'compsci', 'computerscience'],
+        'computer-science'       => ['computer_science', 'cs', 'compsci', 'computerscience', 'computing science'],
         'computer-security'      => ['computer_security'],
         'computers'              => ['computing'],
         'conspiracy'             => ['deep state'],
@@ -127,9 +126,9 @@ return [
         'deep-learning'          => ['deep_learning', 'deeplearning'],
         'democracy'              => [],
         'design'                 => [],
-        'development'            => ['developer', 'dev'],
+        'development'            => ['developer', 'dev', 'appdev'],
         'deviance'               => [],
-        'devops'                 => [],
+        'devops'                 => ['devop'],
         'devsecops'              => [],
         'dictionary'             => [],
         'differential-privacy'   => ['differential_privacy', 'differentialprivacy'],
@@ -139,6 +138,7 @@ return [
         'dystopia'               => [],
         'dkim'                   => [],
         'data'                   => ['data-driven'],
+        'energy'                 => [],
 
         // E
         'employment'             => ['job', 'jobs', 'work', 'antiwork', 'werk'],
@@ -210,6 +210,7 @@ return [
         'ios'                    => [],
         'iphone'                 => [],
         'israel'                 => [],
+        'industry'               => [],
 
         // J
         // K
@@ -240,7 +241,7 @@ return [
         'microsoft'              => [],
         'military'               => [],
         'mobile'                 => [],
-        'money'                  => [],
+        'money'                  => ['capital'],
         'multi-media'            => [],
         'music'                  => [],
 
@@ -265,11 +266,12 @@ return [
         'osx'                    => [],
 
         // P
-        'productivity'           => [],
+        'productivity'           => ['lifehacks', 'lifehack', 'pomodoro', 'personal-productivity'],
         'politics'               => ['#politics', 'politiek'],
-        'pki'                    => ['certificates', 'key-management', 'key-transparency', 'krypto_key_revocation', 'krypto_pki_ca', 'krypto_tls_cert'],
+        'pki'                    => ['certificates', 'key-management', 'key-transparency', 'krypto_key_revocation', 'krypto_pki_ca', 'krypto_tls_cert', 'public-key'],
         'parenting'              => ['motherhood'],
         'psychology'             => [],
+        'personal-finances'      => [],
 
         'palintir'                 => [],
         'patriarchy'               => [],
@@ -315,6 +317,7 @@ return [
         'science'                  => [],
         'sci-fi'                   => ['scifi'],
         'security'                 => [],
+        'security-architecture'    => [],
         'self-hosted'              => ['selfhost'],
         'self-improvement'         => [
             'personal-improvement',
@@ -356,8 +359,9 @@ return [
         'teaching'                 => [],
         'technology'               => ['tech'],
         'terrorism'                => ['terrorist'],
+        'teamwork'                 => ['team'],
         'thought'                  => [],
-        'threat-modeling'          => ['threat-modelling','threat-model','threat modelling'],
+        'threat-modeling'          => ['threat-modelling', 'threat-model', 'threat modelling'],
         'time-management'          => ['time', 'time-tracking', 'time-confetti', 'prioritization'],
         'tls'                      => [],
         'tools'                    => ['tool'],
@@ -389,6 +393,7 @@ return [
 
         // Z
         'zero-trust'               => ['zerotrust'],
+        'zero-knowledge'           => ['zkp', 'zeroknowledge', 'zeroknowledgeproofs'],
         'zorgplicht'               => [],
         'zuckerberg'               => [],
     ],
