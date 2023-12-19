@@ -381,7 +381,7 @@ class WallabagCollector implements CollectorInterface
     public function setConfiguration(array $configuration): void
     {
         $this->configuration = $configuration;
-        $this->cacheFile     = sprintf('%s/wallabag.json', CACHE);
+        $this->cacheFile     = sprintf('%s/wallabag-cache.json', CACHE);
     }
 
     /**
