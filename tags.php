@@ -71,7 +71,7 @@ return [
         'birds'                  => [],
 
         // C
-        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa', 'hashing', 'ciphertext'],
+        'cryptography'           => ['assymetric', 'cryptograph', 'multiparty computation', 'rsa', 'hashing', 'ciphertext','elliptic_curve_cryptography'],
         'capitalism'             => [],
         'carriere'               => ['career', 'carreer', 'career-advice'],
         'automotive'             => ['self-driving'],
