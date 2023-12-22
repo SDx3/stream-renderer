@@ -13,7 +13,7 @@ cd $SCRIPT_DIR/build
 git clone https://github.com/SDx3/sanderdorigo.nl.git .
 cd $SCRIPT_DIR
 
-git pull 
+git pull > /dev/null
 
 if [ "$1" == "--clean" ]; then
     rm -f $SCRIPT_DIR/cache/tags.json
