@@ -10,10 +10,10 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 rm -rf $SCRIPT_DIR/build
 mkdir -p $SCRIPT_DIR/build
 cd $SCRIPT_DIR/build
-git clone https://github.com/SDx3/sanderdorigo.nl.git . > /dev/null
+git clone https://github.com/SDx3/sanderdorigo.nl.git . > /dev/null 2>&1
 cd $SCRIPT_DIR
 
-git pull > /dev/null
+git pull > /dev/null 2>&1
 
 if [ "$1" == "--clean" ]; then
     rm -f $SCRIPT_DIR/cache/tags.json
