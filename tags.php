@@ -217,6 +217,8 @@ return [
         'klokkenluiders'         => [],
         'knowledge-management'   => [
             'knowledgemanagment',
+            'personal-knowledge-management',
+            'collaboration',
             'knowledge management',
             'knowledgemanagement',
             'knowledge',
