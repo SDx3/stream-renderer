@@ -47,11 +47,15 @@ class SpotifyCollector implements CollectorInterface
     private Logger    $logger;
     private ?PinBoard $pinBoard;
 
+    private Carbon $oldestDate;
+
     /**
      * @inheritDoc
      */
     public function collect(bool $skipCache = false): void
     {
+        // hard coded age cut off for new liked songs.
+        $this->oldestDate = new Carbon('2023-11-01');
         $this->logger->debug('SpotifyCollector is going to collect.');
         $useCache = true;
 
@@ -255,8 +259,8 @@ class SpotifyCollector implements CollectorInterface
             $this->logger->error(sprintf('The Spotify server is down: %s', $e->getMessage()));
             exit(1);
         }
-        $body = (string)$response->getBody();
-        $json = json_decode($body, true);
+        $body                                = (string)$response->getBody();
+        $json                                = json_decode($body, true);
         $this->configuration['access_token'] = $json['access_token'];
         try {
             $this->token = json_decode($body, true, 8, JSON_THROW_ON_ERROR);
@@ -273,81 +277,119 @@ class SpotifyCollector implements CollectorInterface
      */
     private function getLastLikedSongs(): void
     {
-        $url        = sprintf('https://api.spotify.com/v1/me/tracks', $this->configuration['username']);
-        $opts       = [
+        $more            = true;
+        $max             = 50;
+        $limit           = 50;
+        $collection      = [];
+        $loops           = 0;
+        $collectionCount = 0;
+        $url             = sprintf('https://api.spotify.com/v1/me/tracks', $this->configuration['username']);
+        $opts            = [
             'headers' => [
                 'Authorization' => sprintf('Bearer %s', $this->configuration['access_token']),
             ],
         ];
-        $params     = ['limit' => 10, 'market' => 'NL'];
-        $currentUrl = $url . '?' . http_build_query($params);
+        while ($more && $loops < $max) {
 
-        $client = new Client;
-        try {
-            $response = $client->get($currentUrl, $opts);
-        } catch (ClientException $e) {
-            $this->logger->error(sprintf('The Spotify server is down: %s', $e->getMessage()));
-            exit(1);
-        }
-        $body       = (string)$response->getBody();
-        $results    = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-        $collection = [];
-
-        /** @var array $song */
-        foreach ($results['items'] as $song) {
-            $artist = [];
-            /** @var array $artistArray */
-            foreach ($song['track']['artists'] as $artistArray) {
-                $artist[] = $artistArray['name'];
+            if($collectionCount === count($collection) && $loops > 0) {
+                $this->logger->debug(sprintf('SpotifyCollector has collected %d songs, and the last loop was empty, so we\'re done.', count($collection)));
+                break;
             }
 
-            $item = [
-                'date'  => Carbon::createFromFormat(DateTimeInterface::ATOM, $song['added_at'], $_ENV['TZ']),
-                'url'   => $song['track']['external_urls']['spotify'],
-                'title' => implode(', ', $artist) . ' - ' . $song['track']['name'],
-                'tags'  => [],
-            ];
-            // sleep to spare API
-            sleep(1);
+            $offset     = $loops * $limit;
+            $params     = ['limit' => $limit, 'market' => 'NL', 'offset' => $offset];
+            $currentUrl = $url . '?' . http_build_query($params);
+            $this->logger->debug(sprintf('The Spotify URL is now %s', $currentUrl));
 
-            // get oembed
-            $client   = new Client;
-            $embedURL = sprintf('https://open.spotify.com/oembed?%s', http_build_query(['url' => $song['track']['external_urls']['spotify']]));
-            $opts     = [];
+            $client = new Client;
             try {
-                $response = $client->get($embedURL, $opts);
+                $response = $client->get($currentUrl, $opts);
             } catch (ClientException $e) {
                 $this->logger->error(sprintf('The Spotify server is down: %s', $e->getMessage()));
                 exit(1);
             }
-            $body         = (string)$response->getBody();
-            $embedResults = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            $item['html'] = $embedResults['html'];
-            $tags         = ['music'];
+            $body    = (string)$response->getBody();
+            $results = json_decode($body, true, 16, JSON_THROW_ON_ERROR);
+            // no more songs to download?
+            if (null === $results['next']) {
+                $more = false;
+            }
+            // how many songs in the collection BEFORE we start?
+            $collectionCount = count($collection);
+            // process songs:
+            /** @var array $song */
+            foreach ($results['items'] as $song) {
+                // collect artist
+                $artist = [];
+                /** @var array $artistArray */
+                foreach ($song['track']['artists'] as $artistArray) {
+                    $artist[] = $artistArray['name'];
+                }
 
-            // get tags for song:
-            if (null !== $this->pinBoard) {
-                $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
-                $this->logger->debug(sprintf('Pinboard found tags: %s', join(', ', $extraTags)));
+                // other meta data:
+                $date  = Carbon::createFromFormat(DateTimeInterface::ATOM, $song['added_at'], $_ENV['TZ']);
+                $title = implode(', ', $artist) . ' - ' . $song['track']['name'];
+                $url   = $song['track']['external_urls']['spotify'];
 
-                $extraTags = array_map('strtolower', $extraTags);
-                $tags      = array_unique(array_merge($extraTags, $tags));
-                $tags      = $this->pinBoard->filterTags($tags, $item['url']);
-                sort($tags);
+                // skip over song if before the cut-off date
+                if ($date->lt($this->oldestDate)) {
+                    $this->logger->debug(sprintf('Skipping song %s because %s is before %s', $title, $date->format('Y-m-d'), $this->oldestDate->format('Y-m-d')));
+                    continue;
+                }
 
-                $this->logger->debug(sprintf('Final set of tags is: %s', join(', ', $tags)));
+                $item = [
+                    'date'  => $date,
+                    'url'   => $url,
+                    'title' => $title,
+                    'tags'  => [],
+                    'html'  => $this->getEmbedURL($url),
+                ];
 
-                $item['tags'] = $tags;
+                // get tags for song:
+                $tags = ['music'];
+                if (null !== $this->pinBoard) {
+                    $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
+                    $this->logger->debug(sprintf('Pinboard found tags: %s', join(', ', $extraTags)));
+
+                    $extraTags = array_map('strtolower', $extraTags);
+                    $tags      = array_unique(array_merge($extraTags, $tags));
+                    $tags      = $this->pinBoard->filterTags($tags, $item['url']);
+                    sort($tags);
+
+                    $this->logger->debug(sprintf('Final set of tags is: %s', join(', ', $tags)));
+
+                    $item['tags'] = $tags;
+                }
+
+                $this->logger->debug(sprintf('SpotifyCollector has collected "%s"', $item['title']));
+
+                $collection[] = $item;
             }
 
-
-            // sleep again
-            sleep(1);
-            $this->logger->debug(sprintf('SpotifyCollector has collected "%s"', $item['title']));
-
-            $collection[] = $item;
+            sleep(2);
+            $loops++;
         }
+
+        exit;
         $this->collection = $collection;
+    }
+
+    private function getEmbedURL(string $url): string
+    {
+        sleep(1);
+        // get oembed
+        $client   = new Client;
+        $embedURL = sprintf('https://open.spotify.com/oembed?%s', http_build_query(['url' => $url]));
+        $opts     = [];
+        try {
+            $response = $client->get($embedURL, $opts);
+        } catch (ClientException $e) {
+            $this->logger->error(sprintf('The Spotify server is down: %s', $e->getMessage()));
+            exit(1);
+        }
+        $body = (string)$response->getBody();
+        $json = json_decode($body, true, 16);
+        return (string)($json['html'] ?? '');
     }
 
 }
