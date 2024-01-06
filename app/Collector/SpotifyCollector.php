@@ -291,7 +291,7 @@ class SpotifyCollector implements CollectorInterface
         ];
         while ($more && $loops < $max) {
 
-            if($collectionCount === count($collection) && $loops > 0) {
+            if($collectionCount === count($collection) && $loops > 1) {
                 $this->logger->debug(sprintf('SpotifyCollector has collected %d songs, and the last loop was empty, so we\'re done.', count($collection)));
                 break;
             }
