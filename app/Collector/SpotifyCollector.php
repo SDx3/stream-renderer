@@ -309,7 +309,11 @@ class SpotifyCollector implements CollectorInterface
                 exit(1);
             }
             $body    = (string)$response->getBody();
-            $results = json_decode($body, true, 16, JSON_THROW_ON_ERROR);
+            if(!json_validate($body)) {
+                $this->logger->error(sprintf('The Spotify server delivered invalid JSON: %s', $body));
+                exit(1);
+            }
+            $results = json_decode($body, true, 512);
             // no more songs to download?
             if (null === $results['next']) {
                 $more = false;
