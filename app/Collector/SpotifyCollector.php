@@ -333,7 +333,7 @@ class SpotifyCollector implements CollectorInterface
                 // other meta data:
                 $date  = Carbon::createFromFormat(DateTimeInterface::ATOM, $song['added_at'], $_ENV['TZ']);
                 $title = implode(', ', $artist) . ' - ' . $song['track']['name'];
-                $url   = $song['track']['external_urls']['spotify'];
+                $songURL   = $song['track']['external_urls']['spotify'];
 
                 // skip over song if before the cut-off date
                 if ($date->lt($this->oldestDate)) {
@@ -343,21 +343,21 @@ class SpotifyCollector implements CollectorInterface
 
                 $item = [
                     'date'  => $date,
-                    'url'   => $url,
+                    'url'   => $songURL,
                     'title' => $title,
                     'tags'  => [],
-                    'html'  => $this->getEmbedURL($url),
+                    'html'  => $this->getEmbedURL($songURL),
                 ];
 
                 // get tags for song:
                 $tags = ['music'];
                 if (null !== $this->pinBoard) {
-                    $extraTags = $this->pinBoard->getTagsForUrl($item['url']);
+                    $extraTags = $this->pinBoard->getTagsForUrl($songURL);
                     $this->logger->debug(sprintf('Pinboard found tags: %s', join(', ', $extraTags)));
 
                     $extraTags = array_map('strtolower', $extraTags);
                     $tags      = array_unique(array_merge($extraTags, $tags));
-                    $tags      = $this->pinBoard->filterTags($tags, $item['url']);
+                    $tags      = $this->pinBoard->filterTags($tags, $songURL);
                     sort($tags);
 
                     $this->logger->debug(sprintf('Final set of tags is: %s', join(', ', $tags)));
@@ -373,8 +373,6 @@ class SpotifyCollector implements CollectorInterface
             sleep(2);
             $loops++;
         }
-
-        exit;
         $this->collection = $collection;
     }
 
