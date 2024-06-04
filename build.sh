@@ -40,19 +40,22 @@ git config --global user.name $GIT_NAME
 cd $SCRIPT_DIR/build/content/stream
 git add -A . > /dev/null
 cd $SCRIPT_DIR/build
-git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > /dev/null 2>&1
+OUTPUT=""
+git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > $OUTPUT 2>&1
 
 retVal=$?
 if [ $retVal -eq 0 ]; then
-    echo "Could not do auto commit, please check."
+    echo "Could not do auto commit, please check, code $retVal"
+    echo $OUTPUT
 fi
 
-
-git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all > /dev/null 2>&1
+OUTPUT=""
+git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all > $OUTPUT 2>&1
 
 retVal=$?
 if [ $retVal -eq 0 ]; then
-    echo "Could not do git push, please check."
+    echo "Could not do git push, please check, code $retVal."
+    echo $OUTPUT
 fi
 
 # delete repos again
