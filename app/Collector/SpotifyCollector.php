@@ -272,8 +272,6 @@ class SpotifyCollector implements CollectorInterface
     }
 
     /**
-     * @throws GuzzleException
-     * @throws JsonException
      */
     private function getLastLikedSongs(): void
     {
@@ -292,7 +290,7 @@ class SpotifyCollector implements CollectorInterface
         while ($more && $loops < $max) {
 
             if($collectionCount === count($collection) && $loops > 1) {
-                $this->logger->debug(sprintf('SpotifyCollector has collected %d songs, and the last loop was empty, so we\'re done.', count($collection)));
+                $this->logger->debug(sprintf('SpotifyCollector has collected %d songs, and the last  loop was empty, so we\'re done.', count($collection)));
                 break;
             }
 
@@ -304,7 +302,7 @@ class SpotifyCollector implements CollectorInterface
             $client = new Client;
             try {
                 $response = $client->get($currentUrl, $opts);
-            } catch (ClientException $e) {
+            } catch (ClientException|ServerException|GuzzleException $e) {
                 $this->logger->error(sprintf('The Spotify server is down: %s', $e->getMessage()));
                 exit(1);
             }
@@ -385,7 +383,7 @@ class SpotifyCollector implements CollectorInterface
         $opts     = [];
         try {
             $response = $client->get($embedURL, $opts);
-        } catch (ClientException $e) {
+        } catch (ClientException|ServerException|GuzzleException $e) {
             $this->logger->error(sprintf('The Spotify server is down: %s', $e->getMessage()));
             exit(1);
         }
