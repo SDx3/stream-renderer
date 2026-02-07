@@ -55,5 +55,5 @@ if [ $retVal -eq 0 ]; then
 fi
 
 # delete repos again
-cd $SCRIPT_DIR
-rm -rf build
+#cd $SCRIPT_DIR
+#rm -rf build
