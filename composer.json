@@ -1,13 +1,13 @@
 {
   "require": {
-    "php": ">=8.3",
-    "guzzlehttp/guzzle": "^7.4",
-    "vlucas/phpdotenv": "^5.4",
-    "monolog/monolog": "^2.5",
-    "nesbot/carbon": "^2.57",
-    "twig/twig": "^3.3",
-    "simplepie/simplepie": "^1.5",
-    "abraham/twitteroauth": "^4.0",
+    "php": ">=8.4",
+    "guzzlehttp/guzzle": "^7",
+    "vlucas/phpdotenv": "^5",
+    "monolog/monolog": "^3",
+    "nesbot/carbon": "^3",
+    "twig/twig": "^3",
+    "simplepie/simplepie": "^1",
+    "abraham/twitteroauth": "^8",
     "ext-bcmath": "*"
   },
   "autoload": {
