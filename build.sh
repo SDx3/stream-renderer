@@ -44,14 +44,14 @@ git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 
 retVal=$?
 if [ $retVal -eq 0 ]; then
-    # echo "Could not do auto commit, please check, code $retVal"
+    echo "Could not do auto commit, please check, code $retVal"
 fi
 
 git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all
 
 retVal=$?
 if [ $retVal -eq 0 ]; then
-    # echo "Could not do git push, please check, code $retVal."
+    echo "Could not do git push, please check, code $retVal."
 fi
 
 # delete repos again
