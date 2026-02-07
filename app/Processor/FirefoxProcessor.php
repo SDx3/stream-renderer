@@ -55,6 +55,7 @@ class FirefoxProcessor implements ProcessorInterface
         foreach ($items as $item) {
             $item['title_length'] = $this->titleLength;
             $item['year']         = $item['date']->year;
+            $item['title']        = str_replace('"', '\"', $item['title']);
             $item['month']        = $item['date']->format('m');
             $content              = $template->render($item);
             $date                 = $item['date']->format('Y-m-d-H-i');
