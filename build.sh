@@ -52,7 +52,7 @@ git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all
 retVal=$?
 
 if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
-    echo 'Could not do git push, please check, code %d.' $retVal
+    printf 'Could not do git push, please check, code "%d" "%s"\n' $retVal $retVal
 fi
 
 # delete repos again
