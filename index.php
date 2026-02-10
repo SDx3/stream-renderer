@@ -166,7 +166,6 @@ if ('true' === $_ENV['RUN_MASTODON']) {
             'redirect' => $_ENV['MASTODON_REDIRECT'],
             'key'      => $_ENV['MASTODON_KEY'],
             'secret'   => $_ENV['MASTODON_SECRET'],
-            'user_id'  => $_ENV['TWITTER_USER_ID'],
         ]
     );
     $collector->collect();
