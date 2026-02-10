@@ -41,7 +41,7 @@ cd $SCRIPT_DIR/build/content/stream
 git add -A . > /dev/null
 cd $SCRIPT_DIR/build
 
-git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
+git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > /dev/null
 retVal=$?
 
 if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
@@ -51,9 +51,9 @@ fi
 git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all > /dev/null
 retVal=$?
 
-if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
-    printf 'Could not do git push, please check, code "%d" "%s"\n' $retVal $retVal
-fi
+#if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
+#    printf 'Could not do git push, please check, code "%d" "%s"\n' $retVal $retVal
+#fi
 
 # delete repos again
 #cd $SCRIPT_DIR
