@@ -43,14 +43,14 @@ cd $SCRIPT_DIR/build
 git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 
 retVal=$?
-if [ $retVal -eq 0 ] && [ $retVal -eq "0"]; then
+if [ $retVal -eq 0 ] && [ $retVal -eq "0" ]; then
     echo "Could not do auto commit, please check, code $retVal"
 fi
 
 git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all
 
 retVal=$?
-if [ $retVal -eq 0 ] && [ $retVal -eq "0"]; then
+if [ $retVal -eq 0 ] && [ $retVal -eq "0" ]; then
     echo "Could not do git push, please check, code $retVal."
 fi
 
