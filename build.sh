@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 #
@@ -42,14 +44,14 @@ git add -A . > /dev/null
 cd $SCRIPT_DIR/build
 
 git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > /dev/null
-retVal=$?
+#retVal=$?
 
-if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
-    echo "Could not do auto commit, please check, code $retVal"
-fi
+#if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
+#    echo "Could not do auto commit, please check, code $retVal"
+#fi
 
 git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all > /dev/null
-retVal=$?
+#retVal=$?
 
 #if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
 #    printf 'Could not do git push, please check, code "%d" "%s"\n' $retVal $retVal
