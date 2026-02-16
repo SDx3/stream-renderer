@@ -17,7 +17,7 @@ cd $SCRIPT_DIR
 
 git pull > /dev/null 2>&1
 
-if [ "$1" == "--clean" ]; then
+if [ "${1:-default}" == "--clean" ]; then
     rm -f $SCRIPT_DIR/cache/tags.json
     rm -f $SCRIPT_DIR/cache/urls.json
     rm -f $SCRIPT_DIR/cache/twitter-cache.json
@@ -26,12 +26,6 @@ if [ "$1" == "--clean" ]; then
 fi
 
 php index.php
-
-if [ $? -ne 0 ]
-then
-  echo "Build script failed, will not continue."
-  exit 1
-fi
 
 export $(egrep -v '^#' .env | xargs)
 cd $SCRIPT_DIR/build
