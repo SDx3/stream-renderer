@@ -126,22 +126,27 @@ class PinBoard
         }
 
         $params = [
-            'url'        => $url,
-            'format'     => 'json',
-            'auth_token' => sprintf('%s:%s', $this->user, $this->token),
-            'headers'    => [
-                'User-Agent' => 'sanderdorigo.nl tag collector / 0.1 github.com/SDx3/stream-renderer',
+            'url' => $url,
+        ];
+        $api    = sprintf('https://api.pinboard.in/v2/urls/suggest?%s', http_build_query($params));
+        $client = new Client();
+        $opts   = [
+            'timeout' => 3,
+            'headers' => [
+                'X-Auth-Token' => sprintf('%s:%s', $this->user, $this->token),
+                'User-Agent'   => 'Mozilla/5.0 github.com/SDx3/stream-renderer',
             ],
         ];
-        $api    = sprintf('https://api.pinboard.in/v1/posts/suggest?%s', http_build_query($params));
-        $client = new Client();
-        $opts   = [];
+        $this->logger->debug('a');
         try {
+            $this->logger->debug('b');
             $res = $client->request('GET', $api, $opts);
+            $this->logger->debug('c');
         } catch (GuzzleException $e) {
             $this->logger->error(sprintf('Could not get info! %s', $e->getMessage()));
             return [];
         }
+        $this->logger->debug('d');
         $tags = [];
         if (200 === $res->getStatusCode()) {
             $body = (string)$res->getBody();
