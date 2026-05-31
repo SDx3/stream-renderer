@@ -1,6 +1,6 @@
 {
   "require": {
-    "php": ">=8.4",
+    "php": ">=8.5",
     "guzzlehttp/guzzle": "^7",
     "vlucas/phpdotenv": "^5",
     "monolog/monolog": "^3",
