@@ -58,7 +58,10 @@ foreach ($path as $file) {
     if ('.' !== $file && '..' !== $file && '_index.md' !== $file) {
         if (str_ends_with($file, '.md')) {
             $path = realpath(sprintf("%s/%s", $_ENV['BLOG_PATH'], $file));
-            unlink($path);
+            if(false !== $path && is_file($path)) {
+                unlink($path);
+            }
+
         }
     }
 }
