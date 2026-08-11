@@ -1,7 +1,7 @@
 {
   "require": {
     "php": ">=8.5",
-    "guzzlehttp/guzzle": "^7",
+    "guzzlehttp/guzzle": "^8",
     "vlucas/phpdotenv": "^5",
     "monolog/monolog": "^3",
     "nesbot/carbon": "^3",
