@@ -118,6 +118,7 @@ class PinBoard
      */
     public function getTagsForUrl(string $url): array
     {
+        $apiVersion = 'v1';
         $this->logger->debug(sprintf('Checking tags for URL %s...', $url));
         $hash = sha1($url);
         if (array_key_exists($hash, $this->urls)) {
@@ -126,17 +127,32 @@ class PinBoard
         }
 
         $params = [
-            'url' => $url,
+            'url'        => $url,
+            'auth_token' => sprintf('%s:%s', $this->user, $this->token),
         ];
-        $api    = sprintf('https://api.pinboard.in/v2/urls/suggest?%s', http_build_query($params));
+
+        $api = sprintf('https://api.pinboard.in/v1/posts/suggest?%s', http_build_query($params));
         $client = new Client();
         $opts   = [
-            'timeout' => 3,
+            'timeout' => 12,
             'headers' => [
-                'X-Auth-Token' => sprintf('%s:%s', $this->user, $this->token),
-                'User-Agent'   => 'Mozilla/5.0 github.com/SDx3/stream-renderer',
+                'User-Agent' => 'Mozilla/5.0 github.com/SDx3/stream-renderer',
             ],
         ];
+        if ('v2' === $apiVersion) {
+            $params = [
+                'url'        => $url,
+            ];
+            $api    = sprintf('https://api.pinboard.in/v2/urls/suggest?%s', http_build_query($params));
+            $opts   = [
+                'timeout' => 12,
+                'headers' => [
+                     'X-Auth-Token' => sprintf('%s:%s', $this->user, $this->token),
+                    'User-Agent' => 'Mozilla/5.0 github.com/SDx3/stream-renderer',
+                ],
+            ];
+        }
+
         $this->logger->debug('a');
         try {
             $this->logger->debug('b');
@@ -150,12 +166,18 @@ class PinBoard
         $tags = [];
         if (200 === $res->getStatusCode()) {
             $body = (string)$res->getBody();
-            $json = json_decode($body, true);
-            $tags = array_merge($tags, $json[0]['popular']);
-            $tags = array_merge($tags, $json[1]['recommended']);
-            $tags = $this->localFilter($tags);
-            $tags = $this->filterTags($tags, $url);
-            $this->logger->debug('Sleep for .25sec...');
+            if('v1' === $apiVersion) {
+                var_dump($body);exit;
+            }
+            if('v2' === $apiVersion) {
+                $json = json_decode($body, true);
+                $tags = array_merge($tags, $json[0]['popular']);
+                $tags = array_merge($tags, $json[1]['recommended']);
+                $tags = $this->localFilter($tags);
+                $tags = $this->filterTags($tags, $url);
+                $this->logger->debug('Sleep for .25sec...');
+            }
+
             usleep(250000);
         }
         $result            = $this->filterTags($tags, $url);
