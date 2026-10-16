@@ -35,6 +35,8 @@ fi
 
 php index.php
 
+echo 'Now done building'
+
 export $(egrep -v '^#' .env | xargs)
 cd $SCRIPT_DIR/build
 
@@ -45,8 +47,12 @@ cd $SCRIPT_DIR/build/content/stream
 git add -A .
 cd $SCRIPT_DIR/build
 
+echo 'Will now add.'
+
 git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 #retVal=$?
+
+echo 'Done adding.'
 
 #if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
 #    echo "Could not do auto commit, please check, code $retVal"
