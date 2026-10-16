@@ -9,7 +9,7 @@ Right now, it has four sources that are sorted chronologically and displayed for
 * Interesting tweets are collected through the [Twitter API](https://developer.twitter.com/en/docs) from [my](https://twitter.com/SanderDorigo/) bookmarked Tweets.
 * Articles I save, read and tag are collected using [Wallabag](https://github.com/wallabag/wallabag).
 * Things I read through RSS feeds are collected and shared using [Tiny Tiny RSS](https://tt-rss.org/).
-* Most of my bookmarks are saved using [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/new/).
+* Most of my bookmarks are saved using [Mozilla Firefox](https://www.mozilla.org/en-US/firefox/new/) and stored in [Raindrop](https://raindrop.io).
 
 ### Pinboard
 

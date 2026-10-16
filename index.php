@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 use App\Collector\FirefoxCollector;
 use App\Collector\MastodonCollector;
+use App\Collector\RaindropCollector;
 use App\Collector\RSSCollector;
 use App\Collector\SpotifyCollector;
 use App\Collector\TwitterCollector;
@@ -74,6 +75,7 @@ $articles         = [];
 $bookmarks        = [];
 $feedArticles     = [];
 $songs            = [];
+$raindropBookmarks = [];
 
 // create pinboard collection object
 $pinBoard = null;
@@ -82,6 +84,24 @@ if ('true' === $_ENV['RUN_PINBOARD']) {
     $pinBoard->setLogger($log);
     $pinBoard->setUser($_ENV['PINBOARD_USER']);
     $pinBoard->setToken($_ENV['PINBOARD_TOKEN']);
+}
+
+if ('true' === $_ENV['RUN_RAINDROP']) {
+    $collector = new RaindropCollector;
+    $collector->setLogger($log);
+    $collector->setPinBoard($pinBoard);
+    $collector->setConfiguration(
+        [
+            'client_id'     => $_ENV['TWITTER_CLIENT_ID'],
+            'client_secret' => $_ENV['TWITTER_CLIENT_SECRET'],
+            'user_id'       => $_ENV['TWITTER_USER_ID'],
+        ]
+    );
+    $collector->collect();
+    $raindropBookmarks = $collector->getCollection();
+
+    // grab PinBoard instance from the Twitter collector. it will contain all the tags it found.
+    $pinBoard = $collector->getPinBoard();
 }
 
 // collect Twitter

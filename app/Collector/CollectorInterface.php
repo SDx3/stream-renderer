@@ -23,6 +23,7 @@
 
 namespace App\Collector;
 
+use App\Data\PinBoard;
 use Monolog\Logger;
 
 /**
@@ -49,5 +50,8 @@ interface CollectorInterface
      * @param Logger $logger
      */
     public function setLogger(Logger $logger): void;
+
+    public function getPinBoard(): ?PinBoard;
+    public function setPinBoard(?PinBoard $pinBoard): void;
 
 }
