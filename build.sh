@@ -9,18 +9,26 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 #
 
 # clone GitHub repository
+echo 'Start clone'
 rm -rf $SCRIPT_DIR/build
 mkdir -p $SCRIPT_DIR/build
 cd $SCRIPT_DIR/build
-git clone https://github.com/SDx3/sanderdorigo.nl.git . > /dev/null 2>&1
+git clone https://github.com/SDx3/sanderdorigo.nl.git .
 cd $SCRIPT_DIR
+echo 'End clone'
 
-git pull > /dev/null 2>&1
+echo 'Going to pull'
+
+git pull
+
+echo 'End pull'
 
 if [ "${1:-default}" == "--clean" ]; then
     rm -f $SCRIPT_DIR/cache/tags.json
     rm -f $SCRIPT_DIR/cache/urls.json
     rm -f $SCRIPT_DIR/cache/twitter-cache.json
+    rm -f $SCRIPT_DIR/cache/mastodon-cache.json
+    rm -f $SCRIPT_DIR/cache/raindrop-cache.json
     rm -f $SCRIPT_DIR/cache/wallabag.json
     rm -f $SCRIPT_DIR/cache/bookmarks-cache.json
 fi
@@ -34,17 +42,17 @@ cd $SCRIPT_DIR/build
 git config --global user.email $GIT_EMAIL
 git config --global user.name $GIT_NAME
 cd $SCRIPT_DIR/build/content/stream
-git add -A . > /dev/null
+git add -A .
 cd $SCRIPT_DIR/build
 
-git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > /dev/null
+git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 #retVal=$?
 
 #if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
 #    echo "Could not do auto commit, please check, code $retVal"
 #fi
 
-git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all > /dev/null
+git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all
 #retVal=$?
 
 #if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
