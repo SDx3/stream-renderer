@@ -225,7 +225,7 @@ class FirefoxCollector implements CollectorInterface
             'uri'    => $set['uri'] ?? null,
             'type'   => $set['type'],
             'tags'   => [],
-            'date'   => Carbon::createFromFormat('U', bcdiv($set['dateAdded'], '1000000'), $_ENV['TZ']),
+            'date'   => Carbon::createFromFormat('U', bcdiv($set['dateAdded'], '1000000'), 'Europe/Amsterdam'),
         ];
         if (array_key_exists('tags', $set)) {
             $object['tags'] = explode(',', $set['tags']);
@@ -297,7 +297,7 @@ class FirefoxCollector implements CollectorInterface
         $this->collection = $json['data'];
         $this->logger->debug('FirefoxCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
-            $entry['date'] = new Carbon($entry['date'], $_ENV['TZ']);
+            $entry['date'] = new Carbon($entry['date'], 'Europe/Amsterdam');
             if (null !== $this->pinBoard) {
                 $entry['categories'] = $this->pinBoard->filterTags($entry['categories'], $entry['url']);
             }

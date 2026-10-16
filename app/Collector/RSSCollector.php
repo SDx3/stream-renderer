@@ -65,7 +65,7 @@ class RSSCollector implements CollectorInterface
 
             $current = [
                 'url'     => $item->get_permalink(),
-                'date'    => Carbon::createFromFormat('Y-m-d H:i:s', $item->get_date('Y-m-d H:i:s'), $_ENV['TZ']),
+                'date'    => Carbon::createFromFormat('Y-m-d H:i:s', $item->get_date('Y-m-d H:i:s'), 'Europe/Amsterdam'),
                 'title'   => $item->get_title(),
                 'host'    => $host,
                 'content' => strip_tags($item->get_description(true)),

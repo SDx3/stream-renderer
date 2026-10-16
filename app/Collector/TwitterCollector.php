@@ -126,7 +126,7 @@ class TwitterCollector implements CollectorInterface
         $objects          = $json['data'];
         $this->collection = [];
         foreach ($objects as $object) {
-            $object['date']     = new Carbon($object['date'], $_ENV['TZ']);
+            $object['date']     = new Carbon($object['date'], 'Europe/Amsterdam');
             $this->collection[] = $object;
         }
     }
@@ -263,7 +263,7 @@ class TwitterCollector implements CollectorInterface
 
         return [
             'id'         => $tweet['data']['id'],
-            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at'], $_ENV['TZ']),
+            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $tweet['data']['created_at'], 'Europe/Amsterdam'),
             'title'      => $tweet['data']['text'],
             'author'     => $authorName,
             'categories' => $tags,

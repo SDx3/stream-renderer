@@ -185,7 +185,7 @@ class SpotifyCollector implements CollectorInterface
         $this->logger->debug('SpotifyCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
             $this->logger->debug(sprintf('Now processing %s', $entry['url']));
-            $entry['date'] = new Carbon($entry['date'], $_ENV['TZ']);
+            $entry['date'] = new Carbon($entry['date'], 'Europe/Amsterdam');
             if (null !== $this->pinBoard) {
                 $entry['tags'] = $this->pinBoard->filterTags($entry['tags'], $entry['url']);
             }
@@ -330,7 +330,7 @@ class SpotifyCollector implements CollectorInterface
                 }
 
                 // other meta data:
-                $date  = Carbon::createFromFormat(DateTimeInterface::ATOM, $song['added_at'], $_ENV['TZ']);
+                $date  = Carbon::createFromFormat(DateTimeInterface::ATOM, $song['added_at'], 'Europe/Amsterdam');
                 $title = implode(', ', $artist) . ' - ' . $song['track']['name'];
                 $songURL   = $song['track']['external_urls']['spotify'];
 

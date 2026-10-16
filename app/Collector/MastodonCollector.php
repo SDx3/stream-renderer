@@ -122,7 +122,7 @@ class MastodonCollector implements CollectorInterface
         $objects          = $json['data'];
         $this->collection = [];
         foreach ($objects as $object) {
-            $object['date']     = new Carbon($object['date'], $_ENV['TZ']);
+            $object['date']     = new Carbon($object['date'], 'Europe/Amsterdam');
             $this->collection[] = $object;
         }
     }
@@ -206,7 +206,7 @@ class MastodonCollector implements CollectorInterface
 
         return [
             'id'         => $data['id'],
-            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $data['created_at'], $_ENV['TZ']),
+            'date'       => Carbon::createFromFormat(DateTimeInterface::RFC3339_EXTENDED, $data['created_at'], 'Europe/Amsterdam'),
             'title'      => strip_tags($data['content']),
             'author'     => $data['account']['display_name'],
             'categories' => $tags,
