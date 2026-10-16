@@ -153,11 +153,11 @@ class PinBoard
             ];
         }
 
-        $this->logger->debug('a');
+        //$this->logger->debug('a');
         try {
-            $this->logger->debug('b');
+//            $this->logger->debug('b');
             $res = $client->request('GET', $api, $opts);
-            $this->logger->debug('c');
+//            $this->logger->debug('c');
         } catch (GuzzleException $e) {
             $this->logger->error(sprintf('Could not get info! %s', $e->getMessage()));
             return [];

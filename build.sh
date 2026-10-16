@@ -39,8 +39,8 @@ export $(egrep -v '^#' .env | xargs)
 cd $SCRIPT_DIR/build
 
 # assume things have changed:
-git config --global user.email $GIT_EMAIL
-git config --global user.name $GIT_NAME
+git config user.email $GIT_EMAIL
+git config user.name $GIT_NAME
 cd $SCRIPT_DIR/build/content/stream
 git add -A .
 cd $SCRIPT_DIR/build

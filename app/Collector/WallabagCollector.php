@@ -278,7 +278,7 @@ class WallabagCollector implements CollectorInterface
             'url'          => $item['url'],
             'host'         => $host,
             'reading_time' => $item['reading_time'],
-            'date'         => new Carbon($item['created_at'], $_ENV['TZ']), // mag ook "archived at" maar liever deze.
+            'date'         => new Carbon($item['created_at'], 'Europe/Amsterdam'), // mag ook "archived at" maar liever deze.
             'wallabag_url' => sprintf('%s/share/%s', $this->configuration['host'], $item['uid']),
             'annotations'  => [],
         ];
@@ -343,7 +343,7 @@ class WallabagCollector implements CollectorInterface
         $this->logger->debug('WallabagCollector has collected from the cache.');
         foreach ($this->collection as $index => $entry) {
             $this->logger->debug(sprintf('Now processing %s', $entry['url']));
-            $entry['date'] = new Carbon($entry['date'], $_ENV['TZ']);
+            $entry['date'] = new Carbon($entry['date'], 'Europe/Amsterdam');
             if (null !== $this->pinBoard) {
                 $entry['tags'] = $this->pinBoard->filterTags($entry['tags'], $entry['url']);
             }
