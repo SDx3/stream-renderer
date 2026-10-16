@@ -109,11 +109,12 @@ class FirefoxCollector implements CollectorInterface
         $sorted           = $this->processChildren('(root)', $json, $sorted);
         $total            = count($sorted);
         $index            = 0;
-        $include          = true; // can be set to false by the YouTube collector.
+
 
         $this->logger->debug('Now looping over bookmarks.');
         foreach ($sorted as $bookmark) {
-            $index++;
+            $include          = true; // can be set to false by the YouTube collector.
+                $index++;
             $this->logger->debug(sprintf('[%d/%d] Processing bookmark.', $index, $total));
 
             // if not a bookmark, continue:

@@ -46,6 +46,7 @@ class SpotifyCollector implements CollectorInterface
     private array     $configuration = [];
     private Logger    $logger;
     private ?PinBoard $pinBoard;
+    private array     $token;
 
     private Carbon $oldestDate;
 

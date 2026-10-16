@@ -35,6 +35,7 @@ use App\Data\PinBoard;
 use App\Filter\PostFilter;
 use App\Processor\FirefoxProcessor;
 use App\Processor\MastodonProcessor;
+use App\Processor\RaindropProcessor;
 use App\Processor\RSSProcessor;
 use App\Processor\SpotifyProcessor;
 use App\Processor\TwitterProcessor;
@@ -59,7 +60,7 @@ foreach ($path as $file) {
     if ('.' !== $file && '..' !== $file && '_index.md' !== $file) {
         if (str_ends_with($file, '.md')) {
             $path = realpath(sprintf("%s/%s", $_ENV['BLOG_PATH'], $file));
-            if(false !== $path && is_file($path)) {
+            if (false !== $path && is_file($path)) {
                 unlink($path);
             }
 
@@ -69,12 +70,12 @@ foreach ($path as $file) {
 $log->debug('Done!');
 
 // all collected items
-$bookmarkedTweets = [];
-$bookmarkedToots  = [];
-$articles         = [];
-$bookmarks        = [];
-$feedArticles     = [];
-$songs            = [];
+$bookmarkedTweets  = [];
+$bookmarkedToots   = [];
+$articles          = [];
+$bookmarks         = [];
+$feedArticles      = [];
+$songs             = [];
 $raindropBookmarks = [];
 
 // create pinboard collection object
@@ -92,9 +93,9 @@ if ('true' === $_ENV['RUN_RAINDROP']) {
     $collector->setPinBoard($pinBoard);
     $collector->setConfiguration(
         [
-            'client_id'     => $_ENV['TWITTER_CLIENT_ID'],
-            'client_secret' => $_ENV['TWITTER_CLIENT_SECRET'],
-            'user_id'       => $_ENV['TWITTER_USER_ID'],
+            'client_id'     => $_ENV['RAINDROP_CLIENT_ID'],
+            'client_secret' => $_ENV['RAINDROP_CLIENT_SECRET'],
+            'redirect'      => $_ENV['RAINDROP_REDIRECT'],
         ]
     );
     $collector->collect();
@@ -297,4 +298,13 @@ if ('true' === $_ENV['RUN_BOOKMARKS']) {
     $processor->setDestination(realpath($_ENV['BLOG_PATH']));
     $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
     $processor->process($bookmarks);
+}
+
+// now process raindrop
+if ('true' === $_ENV['RUN_RAINDROP']) {
+    $processor = new RaindropProcessor();
+    $processor->setLogger($log);
+    $processor->setDestination(realpath($_ENV['BLOG_PATH']));
+    $processor->setTitleLength((int)$_ENV['TITLE_LENGTH']);
+    $processor->process($raindropBookmarks);
 }

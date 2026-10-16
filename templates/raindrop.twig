@@ -1,0 +1,23 @@
+---
+title: "{% if title|length > title_length %}{{ title|slice(0,title_length)|raw }}...{% else %}{{ title|raw }}{% endif %}"
+date: {{ date }}
+icon: bookmark
+source: Bookmarks
+src_url: {{ url }}
+domains:
+- {{ host }}
+{{ year }}: "{{ month }}"
+{% if categories|length > 0 %}categories:
+{% for category in categories %}
+- {{ category }}
+{% endfor %}
+{% endif %}
+{% for tag in tags %}
+    - "{{ tag }}"
+{% endfor %}
+---
+{% if is_youtube %}
+{{ html|raw }}
+{% else %}
+Deze bookmark kan je vinden op [{{ host }}]({{ url }}).
+{% endif %}
