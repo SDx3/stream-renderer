@@ -272,12 +272,12 @@ class WallabagCollector implements CollectorInterface
             $host = substr($host, 4);
         }
         $tags    = [];
-        var_dump($item);exit;
         $article = [
             'type'         => 'wallabag',
             'title'        => $item['title'],
             'url'          => $item['url'],
             'host'         => $host,
+            'tags' => [],
             'reading_time' => $item['reading_time'],
             'date'         => new Carbon($item['created_at'], 'Europe/Amsterdam'), // mag ook "archived at" maar liever deze.
             'wallabag_url' => sprintf('%s/share/%s', $this->configuration['host'], $item['uid']),
@@ -288,7 +288,7 @@ class WallabagCollector implements CollectorInterface
         foreach ($item['tags'] as $tag) {
             $tags[] = $tag['label'];
         }
-        $this->logger->debug(sprintf('Original tag-set is: %s', join(', ', $tags)));
+        // $this->logger->debug(sprintf('Original tag-set is: %s', join(', ', $tags)));
 
         // if pinboard, expand list of tags with what we found online:
         if (null !== $this->pinBoard) {
@@ -302,8 +302,8 @@ class WallabagCollector implements CollectorInterface
 
             $this->logger->debug(sprintf('Final set of tags is: %s', join(', ', $tags)));
 
-            $article['tags'] = $tags;
         }
+        $article['tags'] = $tags;
 
         /** @var array $annotation */
         foreach ($item['annotations'] as $annotation) {
