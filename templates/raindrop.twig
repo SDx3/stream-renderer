@@ -7,14 +7,14 @@ src_url: {{ url }}
 domains:
 - {{ host }}
 {{ year }}: "{{ month }}"
-{% if categories|length > 0 %}categories:
+{% if categories|length > 0 or tags|length > 0 %}categories:
 {% for category in categories %}
 - {{ category }}
 {% endfor %}
-{% endif %}
 {% for tag in tags %}
     - "{{ tag }}"
 {% endfor %}
+{% endif %}
 ---
 {% if is_youtube %}
 {{ html|raw }}
