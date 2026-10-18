@@ -56,7 +56,7 @@ class SpotifyCollector implements CollectorInterface
     public function collect(bool $skipCache = false): void
     {
         // hard coded age cut off for new liked songs.
-        $this->oldestDate = new Carbon('2023-11-01');
+        $this->oldestDate = new Carbon()->subYears(2);
         $this->logger->debug('SpotifyCollector is going to collect.');
         $useCache = true;
 

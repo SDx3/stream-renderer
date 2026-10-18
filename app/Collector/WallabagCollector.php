@@ -272,6 +272,7 @@ class WallabagCollector implements CollectorInterface
             $host = substr($host, 4);
         }
         $tags    = [];
+        var_dump($item);exit;
         $article = [
             'type'         => 'wallabag',
             'title'        => $item['title'],
