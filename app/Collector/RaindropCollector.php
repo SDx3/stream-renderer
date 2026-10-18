@@ -206,6 +206,7 @@ class RaindropCollector implements CollectorInterface
                         'host'  => $host,
                         'is_youtube' => $isYoutube,
                         'html'       => $ytHtml,
+                        'tags' => $raindrop['tags'],
                     ];
 
                     $this->collection[] = $item;
