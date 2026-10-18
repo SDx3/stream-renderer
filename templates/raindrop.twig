@@ -9,10 +9,10 @@ domains:
 {{ year }}: "{{ month }}"
 {% if categories|length > 0 or tags|length > 0 %}categories:
 {% for category in categories %}
-- {{ category }}
+- "{{ category }}"
 {% endfor %}
 {% for tag in tags %}
-    - "{{ tag }}"
+- "{{ tag }}"
 {% endfor %}
 {% endif %}
 ---

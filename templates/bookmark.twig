@@ -9,10 +9,10 @@ domains:
 {{ year }}: "{{ month }}"
 categories:
 {% for category in categories %}
-- {{ category }}
+- "{{ category }}"
 {% endfor %}
 {% for tag in tags %}
-    - "{{ tag }}"
+- "{{ tag }}"
 {% endfor %}
 ---
 {% if is_youtube %}

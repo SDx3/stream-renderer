@@ -10,7 +10,7 @@ source: Spotify
 src_url: "{{ url }}"
 categories:
 {% for tag in tags %}
-    - "{{ tag }}"
+- "{{ tag }}"
 {% endfor %}
 ---
 {{ html|raw }}
