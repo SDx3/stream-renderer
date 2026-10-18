@@ -5,14 +5,15 @@ icon: rss
 source: RSS
 src_url: {{ url }}
 domains:
-- {{ host }}
+  - {{ host }}
 {{ year }}: "{{ month }}"
-categories:
+{% if categories|length > 0 or tags|length > 0 %}categories:
 {% for category in categories %}
-- {{ category }}
+  - {{ category }}
 {% endfor %}
 {% for tag in tags %}
-- "{{ tag }}"
+  - {{ tag }}
 {% endfor %}
+{% endif %}
 ---
 Het oorspronkelijke artikel kan je lezen op [{{ host }}]({{ url }}).

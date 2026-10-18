@@ -4,12 +4,13 @@ date: {{ date }}
 icon: article
 source: Wallabag
 domains:
-- {{ host }}
+  - {{ host }}
 src_url: "{{ wallabag_url }}"
 {{ year }}: "{{ month }}"
-categories:
+{% if categories|length > 0 or tags|length > 0 %}categories:
 {% for tag in tags %}
-- "{{ tag }}"
+  - {{ tag }}
 {% endfor %}
+{% endif %}
 ---
 Het oorspronkelijke artikel kan je lezen op [{{ host }}]({{ url }}) of [op Wallabag]({{ wallabag_url }}). {% if reading_time > 0 %}De leestijd is ongeveer {{ reading_time }} {% if reading_time != 1 %}minuten{% else %}minuut{% endif %}.{% endif %}
