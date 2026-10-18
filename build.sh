@@ -9,19 +9,12 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 #
 
 # clone GitHub repository
-echo 'Start clone'
 rm -rf $SCRIPT_DIR/build
 mkdir -p $SCRIPT_DIR/build
 cd $SCRIPT_DIR/build
 git clone https://github.com/SDx3/sanderdorigo.nl.git .
 cd $SCRIPT_DIR
-echo 'End clone'
-
-echo 'Going to pull'
-
 git pull
-
-echo 'End pull'
 
 if [ "${1:-default}" == "--clean" ]; then
     rm -f $SCRIPT_DIR/cache/tags.json
@@ -35,8 +28,6 @@ fi
 
 php index.php
 
-echo 'Now done building'
-
 export $(egrep -v '^#' .env | xargs)
 cd $SCRIPT_DIR/build
 
@@ -47,12 +38,8 @@ cd $SCRIPT_DIR/build/content/stream
 git add -A .
 cd $SCRIPT_DIR/build
 
-echo 'Will now add.'
-
 git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 #retVal=$?
-
-echo 'Done adding.'
 
 #if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
 #    echo "Could not do auto commit, please check, code $retVal"
