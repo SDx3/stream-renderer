@@ -35,7 +35,7 @@ cd $SCRIPT_DIR/build
 git config user.email $GIT_EMAIL
 git config user.name $GIT_NAME
 cd $SCRIPT_DIR/build/content/stream
-git add -A .
+git add -A . -q
 cd $SCRIPT_DIR/build
 
 git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
@@ -45,7 +45,7 @@ git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
 #    echo "Could not do auto commit, please check, code $retVal"
 #fi
 
-git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all
+git push "https://$GIT_USER:$GIT_PASS@github.com/SDx3/sanderdorigo.nl.git" --all  -q
 #retVal=$?
 
 #if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
