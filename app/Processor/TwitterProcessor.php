@@ -35,6 +35,7 @@ use Twig\Loader\FilesystemLoader;
 class TwitterProcessor implements ProcessorInterface
 {
 
+    use ProcessorTrait;
     private string $destination;
     private Logger $logger;
     private int    $titleLength = 50;
@@ -60,10 +61,11 @@ class TwitterProcessor implements ProcessorInterface
             $replace              = ['\\"'];
             $item['title']        = str_replace($search, $replace, $item['title']);
             $content              = $template->render($item);
-            $date                 = $item['date']->format('Y-m-d-H-i');
-            $filename             = sprintf('%s-tweet.md', $date);
-            $full                 = sprintf('%s/%s', $this->destination, $filename);
+
+
+            $full                 = $this->getFileName($item['date'], 'tweet', $this->destination);
             file_put_contents($full, $content);
+
         }
         $this->logger->debug('Done!');
     }

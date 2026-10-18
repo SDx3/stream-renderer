@@ -34,6 +34,7 @@ use Twig\Loader\FilesystemLoader;
  */
 class FirefoxProcessor implements ProcessorInterface
 {
+    use ProcessorTrait;
     private string $destination;
     private Logger $logger;
     private int    $titleLength = 50;
@@ -58,9 +59,8 @@ class FirefoxProcessor implements ProcessorInterface
             $item['title']        = str_replace('"', '\"', $item['title']);
             $item['month']        = $item['date']->format('m');
             $content              = $template->render($item);
-            $date                 = $item['date']->format('Y-m-d-H-i');
-            $filename             = sprintf('%s-bookmark.md', $date);
-            $full                 = sprintf('%s/%s', $this->destination, $filename);
+
+            $full                 = $this->getFileName($item['date'], 'firefox', $this->destination);
             file_put_contents($full, $content);
         }
         $this->logger->debug('Done!');

@@ -31,6 +31,7 @@ use Twig\Loader\FilesystemLoader;
 
 class RaindropProcessor implements ProcessorInterface
 {
+    use ProcessorTrait;
     private string $destination;
     private Logger $logger;
     private int    $titleLength = 50;
@@ -55,15 +56,12 @@ class RaindropProcessor implements ProcessorInterface
             $item['title']        = str_replace('"', '\"', $item['title']);
             $item['month']        = $item['date']->format('m');
 
-            $content              = $template->render($item);
-//            if(true === $item['is_youtube']) {
-//                echo $content;
-//                exit;
-//            }
-            $date                 = $item['date']->format('Y-m-d-H-i');
-            $filename             = sprintf('%s-raindrop.md', $date);
-            $full                 = sprintf('%s/%s', $this->destination, $filename);
+            $content = $template->render($item);
+
+
+            $full                 = $this->getFileName($item['date'], 'raindrop', $this->destination);
             file_put_contents($full, $content);
+
         }
         $this->logger->debug('Done!');
     }

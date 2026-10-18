@@ -31,7 +31,7 @@ use Twig\Loader\FilesystemLoader;
 
 class RSSProcessor implements ProcessorInterface
 {
-
+use ProcessorTrait;
     private string $destination;
     private Logger $logger;
     private int    $titleLength = 50;
@@ -54,10 +54,10 @@ class RSSProcessor implements ProcessorInterface
             $item['year']         = $item['date']->year;
             $item['month']        = $item['date']->format('m');
             $content              = $template->render($item);
-            $date                 = $item['date']->format('Y-m-d-H-i');
-            $filename             = sprintf('%s-article.md', $date);
-            $full                 = sprintf('%s/%s', $this->destination, $filename);
+
+            $full                 = $this->getFileName($item['date'], 'article', $this->destination);
             file_put_contents($full, $content);
+
         }
         $this->logger->debug('Done!');
     }
