@@ -14,7 +14,7 @@ mkdir -p $SCRIPT_DIR/build
 cd $SCRIPT_DIR/build
 git clone https://github.com/SDx3/sanderdorigo.nl.git . -q
 cd $SCRIPT_DIR
-git pull -q
+git pull -q > /dev/null
 
 if [ "${1:-default}" == "--clean" ]; then
     rm -f $SCRIPT_DIR/cache/tags.json
