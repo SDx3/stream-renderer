@@ -38,7 +38,7 @@ cd $SCRIPT_DIR/build/content/stream
 git add -A .
 cd $SCRIPT_DIR/build
 
-git commit -m "Auto-commit on `date +"%Y-%m-%d"`"
+git commit -m "Auto-commit on `date +"%Y-%m-%d"`" > /dev/null
 #retVal=$?
 
 #if [ "$retVal" -eq 0 ] && [ "$retVal" -eq "0" ]; then
